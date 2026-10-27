@@ -4,3 +4,4 @@ target/
 .DS_Store
 .vercel
 art/*.png
+deploy/

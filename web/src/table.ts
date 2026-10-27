@@ -23,7 +23,9 @@ export interface Controller {
   cardChit(): Promise<string | null>;
   prove(chit: string): Promise<ProofResult>;
   reveal(): { seats: { id: number; name: string; role: Role }[]; salt: string; commitment: string } | null;
-  tickAfterNight?: () => void;
+  /** Extra end-of-game panel: the host's payout request on a staked table. */
+  extraEnd?: () => HTMLElement | null;
+  leave?: () => void;
 }
 
 export const ROLE_NAME: Record<Role, string> = { leaker: 'The Leaker', auditor: 'The Auditor', shielder: 'The Shielder', glitch: 'The Glitch', citizen: 'Citizen' };
@@ -219,6 +221,8 @@ export function renderTable(root: HTMLElement, ctl: Controller, onLeave: () => v
     async function run() {
       out.replaceChildren(h('p', { class: 'muted' }, 'Checking with the official Zcash crates…'));
       try {
+        if (!input.value.trim()) input.value = (await c.cardChit()) ?? '';
+        if (!input.value.trim()) throw new Error('Paste the chit for your role card first.');
         const r = await c.prove(input.value);
         out.replaceChildren(
           ...([h('ol', { class: 'checks' }, ...r.report.steps.map((s) => h('li', { class: s.ok ? 'ok' : s.ok === false ? 'bad' : 'skip' }, h('i', {}, s.ok ? '✓' : s.ok === false ? '✕' : '–'), s.label))),
@@ -240,6 +244,7 @@ export function renderTable(root: HTMLElement, ctl: Controller, onLeave: () => v
   return () => {
     off();
     overlay?.remove();
+    ctl.leave?.();
   };
 }
 
@@ -259,7 +264,7 @@ function feedItem(e: GameEvent, v: View): HTMLElement | null {
     case 'claim':
       return h('div', { class: 'f-claim' }, h('b', {}, name(e.seat)), ' claims ', h('span', { class: `rt r-${e.role}` }, ROLE_NAME[e.role]), e.checked ? ` · says ${name(e.checked.seat)} is ${e.checked.leaker ? 'a LEAKER' : 'clear'}` : '', h('span', { class: 'unproven' }, 'unproven'));
     case 'proof':
-      return h('div', { class: 'f-proof' }, '✓ ', h('b', {}, name(e.seat)), ' proved their role card: ', h('span', { class: `rt r-${e.role}` }, ROLE_NAME[e.role]), h('span', { class: 'proven' }, 'verified chit'));
+      return h('div', { class: 'f-proof' }, '✓ ', h('b', {}, e.seat === v.me ? 'You' : name(e.seat)), e.seat === v.me ? ' proved your role card: ' : ' proved their role card: ', h('span', { class: `rt r-${e.role}` }, ROLE_NAME[e.role]), h('span', { class: 'proven' }, 'verified chit'));
     case 'tally': {
       const total = Object.values(e.counts).reduce((a, b) => a + b, 0) || 1;
       return h(
@@ -298,6 +303,7 @@ function endPanel(v: View, ctl: Controller, onLeave: () => void) {
         )
       : null,
     ctl.practice ? h('p', { class: 'hint' }, 'On a staked table, the winners split the pot here: one ZIP 321 payment request from the table wallet, published as a Chit payout ledger.') : null,
+    ctl.extraEnd?.() ?? null,
     h('div', { class: 'row' }, h('button', { class: 'btn primary', type: 'button', onclick: onLeave }, 'Back to town')),
   );
 }

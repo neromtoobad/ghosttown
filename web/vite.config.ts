@@ -1,7 +1,7 @@
 import { defineConfig, type Plugin } from 'vite';
 
 // The page talks to itself, the explorer (deal and buy-in transactions) and the table relay.
-const RELAY = process.env.VITE_RELAY ?? 'wss://ghosttown-relay.up.railway.app';
+const RELAY = process.env.VITE_RELAY ?? 'wss://ghosttown-relay-production.up.railway.app';
 const csp = [
   "default-src 'self'",
   "script-src 'self' 'wasm-unsafe-eval'",
