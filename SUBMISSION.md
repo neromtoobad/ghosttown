@@ -52,7 +52,7 @@ Doors: #/practice · #/lanterns · #/desk · #/arcade · #/gallery · /glasstown
 
 ## Demo video
 
-`zecathon/ghosttown-video.mp4`: a music video set to an original UK rap track, "Ghost Town", built from real gameplay and the mainnet deal. Upload it to YouTube, then paste the link.
+`zecathon/ghosttown-video.mp4` (1:46): a 20-second short film (the Watcher, a Leaker, the Shielder, the Auditor), then an original UK drill track that walks through every door in the hub, from real gameplay and the mainnet deal. Upload it to YouTube, then paste the link.
 
 ## Before pressing SUBMIT
 
