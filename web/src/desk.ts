@@ -10,15 +10,18 @@ import { watcher } from './two';
 
 const B32 = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
 const addr = (r: () => number) => 'u1' + Array.from({ length: 58 }, () => B32[Math.floor(r() * 32)]).join('');
+/** Opens a payment with a key's owner: incoming hides the sender, outgoing shows the recipient. */
+export const opens = (p: Pay, owner: Wallet) => p.from === owner || p.to === owner;
 const rand = () => { const a = crypto.getRandomValues(new Uint32Array(1))[0]; return a / 2 ** 32; };
 const shuffle = <T,>(xs: T[]) => xs.map((x) => [rand(), x] as const).sort((a, b) => a[0] - b[0]).map(([, x]) => x);
 
-interface Wallet { name: string; addr: string }
-interface Pay { id: number; from: Wallet | null; to: Wallet; zec: string; memo: string; watcher?: boolean }
+export interface Wallet { name: string; addr: string }
+export interface Pay { id: number; from: Wallet | null; to: Wallet; zec: string; memo: string; watcher?: boolean }
 
 const MEMOS = ['rent, sorry it’s late', 'ajo contribution · week 6', 'lantern oil for the hall', 'happy birthday ghost', 'your half of the suya', 'for the new seat at table 7', 'buy-in, see you tonight', 'thanks for the shield last night'];
 
-function puzzle() {
+/** One night's puzzle: five suspects, three viewing keys (one is the Leaker's), eight payments. */
+export function puzzle() {
   const names = shuffle(BOT_NAMES).slice(0, 5);
   const suspects: Wallet[] = names.map((name) => ({ name, addr: addr(rand) }));
   const leaker = suspects[Math.floor(rand() * 5)];
@@ -72,7 +75,7 @@ export function deskView(): HTMLElement {
     if (key === null || over) return;
     tries++;
     const owner = P.owners[key];
-    if (p.from === owner || p.to === owner) {
+    if (opens(p, owner)) {
       opened.set(p.id, key);
       say.innerHTML = p.watcher ? 'That’s <b>mine</b>. Six-six-six for a job well done. Now: whose wallet received it?' : 'Ordinary ghost business. Keep looking.';
     } else {

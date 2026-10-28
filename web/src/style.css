@@ -387,3 +387,20 @@ input.masked { -webkit-text-security: disc; }
 /* ---------- Arcade ---------- */
 .arcade-cab { margin-top: 16px; }
 .nav-glass { color: #7fd3e8 !important; }
+
+/* ---------- the judges' tour ---------- */
+.tour { max-width: 980px; margin: 0 auto; padding-bottom: 40px; }
+.tour-summary { margin: 14px 0; min-height: 26px; }
+.tour-list { list-style: none; padding: 0; display: grid; gap: 10px; counter-reset: step; }
+.tour-step { counter-increment: step; position: relative; border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px 12px 54px; background: var(--night-2); transition: border-color .2s, background .2s; }
+.tour-step::before { content: counter(step, decimal-leading-zero); position: absolute; left: 16px; top: 14px; font: 600 13px var(--mono); color: var(--mute); }
+.tour-step p { margin: 4px 0 0; font-size: 13.5px; }
+.ts-head { display: flex; justify-content: space-between; gap: 12px; align-items: baseline; }
+.ts-head b { font: 650 15.5px var(--sans); }
+.ts-tag { font: 500 10.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; padding: 3px 8px; border-radius: 4px; border: 1px solid var(--line-2); color: var(--mute); white-space: nowrap; }
+.ts-tag.reject { border-color: rgba(255,77,94,.45); color: #ff8a95; }
+.ts-out { font: 13px var(--mono) !important; color: var(--text); }
+.tour-step.run { border-color: var(--lantern); }
+.tour-step.good { border-color: rgba(124,245,168,.6); background: #0a130e; } .tour-step.good::before { content: '✓'; color: var(--shield); font-size: 16px; }
+.tour-step.bad { border-color: var(--leak); background: #170a0e; } .tour-step.bad::before { content: '✕'; color: var(--leak); font-size: 16px; }
+.nav-tour { color: var(--lantern) !important; }

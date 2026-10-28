@@ -96,7 +96,7 @@ export function galleryView(txArg?: string): HTMLElement {
     try {
       await ready();
       const tx = await fetchTx(txid);
-      if (txidOf(tx.hex) !== txid) throw new Error('The explorer returned a different transaction.');
+      if (txidOf(tx.hex) !== txid) throw new Error('Those bytes do not hash to this txid. Refusing them.');
       hex = tx.hex;
       actions = 1;
       for (const c of known) open(c);

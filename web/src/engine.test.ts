@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { act, alive, crackShield, botDay, botNight, botVote, commit, newGame, nightPending, openVote, resolveNight, resolveVote, rolesFor, verifyDeal, vote, votePending, winners, type Game } from './engine';
+import { act, alive, crackShield, viewFor, checkWin, seat, botDay, botNight, botVote, commit, newGame, nightPending, openVote, resolveNight, resolveVote, rolesFor, verifyDeal, vote, votePending, winners, type Game } from './engine';
 
 const table = (n: number) => Array.from({ length: n }, (_, i) => ({ name: `Ghost ${i + 1}`, bot: true }));
 
@@ -103,5 +103,88 @@ describe('Dark Pool', () => {
     resolveNight(g);
     expect(g.seats[victim.id].alive).toBe(false);
     expect(g.lastShield).toBe(-1);
+  });
+});
+
+describe('table sizes', () => {
+  it.each([5, 6, 7, 8, 9, 10])('%i seats get a fair cast', (n) => {
+    const roles = rolesFor(n);
+    expect(roles).toHaveLength(n);
+    expect(roles.filter((r) => r === 'auditor')).toHaveLength(1);
+    expect(roles.filter((r) => r === 'shielder')).toHaveLength(1);
+    expect(roles.filter((r) => r === 'leaker').length).toBe(n >= 7 ? 2 : 1);
+  });
+});
+
+describe('what each seat may know', () => {
+  it('a citizen sees only their own role until the end', () => {
+    const g = newGame(table(7), 'views', 's');
+    const me = g.seats.find((s) => s.role === 'citizen')!;
+    const v = viewFor(g, me.id);
+    expect(v.seats.filter((s) => s.role !== null).map((s) => s.id)).toEqual([me.id]);
+    expect(v.salt).toBeNull();
+    expect(v.audits).toEqual([]);
+  });
+  it('Leakers see each other, and nobody else', () => {
+    const g = newGame(table(7), 'leak-view', 's');
+    const [l1, l2] = g.seats.filter((s) => s.role === 'leaker');
+    const known = viewFor(g, l1.id).seats.filter((s) => s.role !== null).map((s) => s.id).sort();
+    expect(known).toEqual([l1.id, l2.id].sort());
+  });
+  it("only the Auditor reads the Auditor's notebook", () => {
+    const g = newGame(table(5), 'notebook', 's');
+    const auditor = g.seats.find((s) => s.role === 'auditor')!;
+    const leaker = g.seats.find((s) => s.role === 'leaker')!;
+    for (const id of nightPending(g)) botNight(g, id);
+    resolveNight(g);
+    expect(seat(g, auditor.id).role).toBe('auditor');
+    expect(viewFor(g, auditor.id).audits).toHaveLength(1);
+    expect(viewFor(g, leaker.id).audits).toEqual([]);
+  });
+  it('the salt is revealed only when the game is over', () => {
+    const g = playOut(newGame(table(6), 'salt-reveal', 'the salt'));
+    expect(viewFor(g, 0).salt).toBe('the salt');
+  });
+});
+
+describe('Dark Pool shields', () => {
+  it('only a living Shielder can crack a shield, and only at night', () => {
+    const g = newGame(table(5), 'crack-rules', 's');
+    const citizen = g.seats.find((s) => s.role === 'citizen')!;
+    const shielder = g.seats.find((s) => s.role === 'shielder')!;
+    expect(() => crackShield(g, citizen.id)).toThrow();
+    g.phase = 'day';
+    expect(() => crackShield(g, shielder.id)).toThrow();
+  });
+  it('a held shield is logged, a cracked one is not', () => {
+    const g = newGame(table(5), 'held-vs-cracked', 's');
+    const leaker = g.seats.find((s) => s.role === 'leaker')!;
+    const shielder = g.seats.find((s) => s.role === 'shielder')!;
+    const victim = g.seats.find((s) => s.role === 'citizen')!;
+    act(g, leaker.id, victim.id);
+    crackShield(g, shielder.id);
+    for (const id of nightPending(g)) botNight(g, id);
+    resolveNight(g);
+    expect(g.log.some((e) => e.kind === 'held')).toBe(false);
+  });
+});
+
+describe('endings', () => {
+  it('the town wins when every Leaker is exposed', () => {
+    const g = newGame(table(5), 'town-wins', 's');
+    for (const s of g.seats) if (s.role === 'leaker') s.alive = false;
+    expect(checkWin(g)).toBe(true);
+    expect(g.winner).toBe('town');
+  });
+  it('the Leakers win when they equal everyone else alive', () => {
+    const g = newGame(table(5), 'leak-wins', 's');
+    const others = g.seats.filter((s) => s.role !== 'leaker');
+    for (const s of others.slice(0, 3)) s.alive = false;
+    expect(checkWin(g)).toBe(true);
+    expect(g.winner).toBe('leak');
+  });
+  it('a commitment changes with the salt, so nobody can guess the deal from it', () => {
+    const g = newGame(table(7), 'salted', 'one');
+    expect(commit(g.seats, 'one')).not.toBe(commit(g.seats, 'two'));
   });
 });

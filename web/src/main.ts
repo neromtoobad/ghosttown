@@ -12,6 +12,7 @@ import { fromGlasstown, myGhost, watcher } from './two';
 import { hub, toggleRadio } from './hub';
 import { lanternsView } from './lanterns';
 import { deskView } from './desk';
+import { tourView } from './tour';
 import { darkPool } from './glass/game';
 import { state as glassState } from './glass/state';
 
@@ -22,7 +23,7 @@ function shell(...kids: Node[]) {
   leave?.();
   leave = null;
   app.replaceChildren(
-    h('header', { class: 'top' }, h('a', { class: 'brand', href: '#/' }, h('img', { src: art('role-leaker.png'), alt: '' }), h('b', {}, 'GHOST TOWN')), h('nav', {}, h('a', { href: '#/practice' }, 'Séance Hall'), h('a', { href: '#/lanterns' }, 'Lanterns'), h('a', { href: '#/desk' }, 'Desk'), h('a', { href: '#/arcade' }, 'Arcade'), h('a', { href: '#/gallery' }, 'Gallery'), h('a', { href: '/glasstown.html', class: 'nav-glass' }, 'Glasstown'))),
+    h('header', { class: 'top' }, h('a', { class: 'brand', href: '#/' }, h('img', { src: art('role-leaker.png'), alt: '' }), h('b', {}, 'GHOST TOWN')), h('nav', {}, h('a', { href: '#/tour', class: 'nav-tour' }, 'Judges’ tour'), h('a', { href: '#/practice' }, 'Séance Hall'), h('a', { href: '#/lanterns' }, 'Lanterns'), h('a', { href: '#/desk' }, 'Desk'), h('a', { href: '#/arcade' }, 'Arcade'), h('a', { href: '#/gallery' }, 'Gallery'), h('a', { href: '/glasstown.html', class: 'nav-glass' }, 'Glasstown'))),
     h('main', {}, ...kids),
     h('footer', {}, h('span', {}, 'A shielded social deduction game on Zcash. Proofs by ', h('a', { href: 'https://chit.nerom.site', target: '_blank', rel: 'noreferrer' }, 'chit-zcash'), '.'), h('span', {}, 'Glasstown + Ghost Town · ZECATHON')),
   );
@@ -132,6 +133,7 @@ function render() {
   else if (head === 'lanterns') shell(lanternsView());
   else if (head === 'desk') shell(deskView());
   else if (head === 'arcade') arcade();
+  else if (head === 'tour') shell(tourView());
   else if (head === 'radio') { home(); toggleRadio(); }
   else home();
   window.scrollTo(0, 0);

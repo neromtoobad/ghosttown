@@ -63,7 +63,7 @@ export function hub(): HTMLElement {
   return h(
     'section',
     { class: 'hub' },
-    h('div', { class: 'hub-head' }, h('div', {}, h('p', { class: 'eyebrow' }, 'A shielded town on Zcash'), h('h1', {}, 'GHOST ', h('em', {}, 'TOWN'))), ghost ? h('div', { class: 'town-me' }, ghost, h('span', {}, 'You, from Glasstown')) : h('a', { class: 'btn primary', href: '#/practice' }, 'Take a seat at the table')),
+    h('div', { class: 'hub-head' }, h('div', {}, h('p', { class: 'eyebrow' }, 'A shielded town on Zcash'), h('h1', {}, 'GHOST ', h('em', {}, 'TOWN'))), h('div', { class: 'row' }, h('a', { class: 'btn', href: '#/tour' }, 'Judges: try to cheat it · 90 s'), ghost ? h('div', { class: 'town-me' }, ghost, h('span', {}, 'You, from Glasstown')) : h('a', { class: 'btn primary', href: '#/practice' }, 'Take a seat at the table'))),
     street,
     h('div', { class: 'doors' }, ...DOORS.map((d) => h('a', { class: `door-card${d.tone === 'red' ? ' red' : ''}${d.tone === 'hall' ? ' hall' : ''}`, href: d.href, onclick: (e: Event) => { if (d.id === 'radio') { e.preventDefault(); toggleRadio(e.currentTarget as HTMLElement); } } }, h('b', {}, d.name), h('span', {}, d.line)))),
   );

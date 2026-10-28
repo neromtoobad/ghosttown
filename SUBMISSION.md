@@ -30,7 +30,8 @@ Glass Gallery: a real mainnet deal from the glass side (sealed actions, raw byte
 Glasstown: a 3-minute side trip for newcomers; the identity you earn becomes your ghost.
 
 Real, Zcash mainnet: table EAS24 dealt Oct 28 in tx d3433a76…8c57 (2 cards, 1 tx); its Auditor proved her card live (#/gallery).
-Also real: engine with bot-vs-bot tests, encrypted multiplayer (X25519 + XChaCha20 via a ciphertext-only relay), proof checks.
+Judges: #/tour runs 10 live checks in 90 s; 4 forgeries, all rejected. 47 tests.
+No third party: transactions come from Zcash lightwalletd via our relay, re-hashed in the browser; no explorer, no analytics.
 Specimen: the practice deal is a proven tx not on chain; always labelled. Trust: the host's browser knows the roles, like a human narrator; the commitment proves the deal didn't change.
 ```
 

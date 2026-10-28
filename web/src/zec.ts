@@ -3,6 +3,7 @@
 
 import { ready, verify, inspect, type Report } from 'chit-zcash';
 import type { Role } from './engine';
+import { RELAY } from './net';
 
 export const CARD_TEXT: Record<Role, string> = {
   leaker: 'THE LEAKER. Each night, choose one ghost to dox. Win when Leakers equal everyone else.',
@@ -69,18 +70,17 @@ export interface TxData {
   height: number | null;
 }
 
+/** Where transactions come from: the table relay's /tx, which reads them straight from Zcash
+ *  lightwalletd. No block explorer ever learns which deal a player looked up, and every caller
+ *  re-hashes the bytes to the txid, so not even the relay can swap a transaction. */
+export const TX_SOURCE = RELAY.replace(/^ws/, 'http');
+
 export async function fetchTx(txid: string): Promise<TxData> {
   if (!/^[0-9a-f]{64}$/.test(txid)) throw new Error('A txid is 64 hex characters.');
-  const r = await fetch(`https://api.blockchair.com/zcash/raw/transaction/${txid}`, { credentials: 'omit', referrerPolicy: 'no-referrer' });
-  if (!r.ok) throw new Error(`The explorer answered ${r.status}. A fresh transaction can take a minute to appear.`);
-  const j = await r.json();
-  const hex = j?.data?.[txid]?.raw_transaction;
-  if (!hex) throw new Error('The explorer does not know this transaction yet.');
-  const d = await fetch(`https://api.blockchair.com/zcash/dashboards/transaction/${txid}`, { credentials: 'omit', referrerPolicy: 'no-referrer' })
-    .then((x) => x.json())
-    .catch(() => null);
-  const height = d?.data?.[txid]?.transaction?.block_id;
-  return { hex, height: height > 0 ? height : null };
+  const r = await fetch(`${TX_SOURCE}/tx?txid=${txid}`, { credentials: 'omit', referrerPolicy: 'no-referrer' });
+  const j = await r.json().catch(() => null);
+  if (!r.ok || !j?.hex) throw new Error(j?.error ?? `Zcash lookup failed (${r.status}). A fresh transaction can take a minute to appear.`);
+  return { hex: j.hex, height: j.height ?? null };
 }
 
 // ---------- proof of role ----------

@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from 'vite';
 
-// The page talks to itself, the explorer (deal and buy-in transactions) and the table relay.
+// The page talks to itself and the table relay (encrypted moves, and transactions read straight from
+// Zcash lightwalletd). No block explorer, no third party.
 const RELAY = process.env.VITE_RELAY ?? 'wss://ghosttown-relay-production.up.railway.app';
 const csp = [
   "default-src 'self'",
@@ -8,7 +9,7 @@ const csp = [
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self'",
   "img-src 'self' data:",
-  `connect-src 'self' https://api.blockchair.com ${RELAY}`,
+  `connect-src 'self' ${RELAY} ${RELAY.replace(/^ws/, 'http')}`,
   "form-action 'none'",
   "base-uri 'none'",
 ].join('; ');

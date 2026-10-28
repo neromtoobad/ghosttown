@@ -290,7 +290,7 @@ class HostTable {
   async setDeal(txid: string) {
     const tx = await fetchTx(txid);
     await ready();
-    if (txidOf(tx.hex) !== txid) throw new Error('The explorer returned a different transaction.');
+    if (txidOf(tx.hex) !== txid) throw new Error('Those bytes do not hash to this txid. Refusing them.');
     this.dealTxid = txid;
     this.dealHex = tx.hex;
     this.emit();

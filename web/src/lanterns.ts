@@ -8,8 +8,9 @@ import { bytesToHex, utf8ToBytes } from '@noble/hashes/utils';
 import { h, short, sleep } from './dom';
 import { watcher } from './two';
 
-const NAMES = ['A', 'B', 'C'];
-const commit = (lantern: number, salt: string) => bytesToHex(sha256(utf8ToBytes(`ghosttown:lantern:${NAMES[lantern]}:${salt}`)));
+export const NAMES = ['A', 'B', 'C'];
+/** The Watcher's commitment to the lantern hiding the coin: SHA-256 of the lantern and a secret salt. */
+export const commit = (lantern: number, salt: string) => bytesToHex(sha256(utf8ToBytes(`ghosttown:lantern:${NAMES[lantern]}:${salt}`)));
 const hex = (n: number) => bytesToHex(crypto.getRandomValues(new Uint8Array(n)));
 
 export function lanternsView(): HTMLElement {

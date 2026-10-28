@@ -1,82 +1,129 @@
 # Ghost Town
 
-**A shielded social deduction game on Zcash.** Mafia, where your role card is a shielded memo, nobody can fake a role claim, and the pot pays out in ZEC.
+**A shielded town on Zcash, with Mafia at its heart.** Ghost Town is a rainy street of old TVs, and every screen is a door. Everyone here is shielded. The Watcher, who reads every public wallet across the river in Glasstown, can't see in, so he sends Leakers.
 
-**Play:** https://ghosttown.nerom.site. A practice table against bots takes about four minutes, and you need no wallet.
+- **Play:** https://ghosttown.nerom.site (no wallet, no account)
+- **Judges, start here:** https://ghosttown.nerom.site/#/tour. It runs ten live checks in about 90 seconds against a real deal on Zcash mainnet: four forgeries, all rejected.
+- **Video:** the 1:46 demo (a short film, then a UK drill track that walks through every door). The link is in the submission.
 
-Somebody in this town is leaking. Each night the **Leakers** dox one ghost. The **Auditor** checks one ghost's viewing key. The **Shielder** shields one ghost from the dox. By day the town argues, claims roles, and votes on a shielded ballot. The **Glitch** wins by getting voted out.
+ZECATHON 2026 · Wildcard · MIT or Apache-2.0.
 
-## Why it needs Zcash
+## The four judging questions
 
-Mafia is a game of secrets. Zcash is a system for them. Each mechanic below is a real shielded-transaction property, not a coat of paint.
+### 1. Privacy: what leaks?
 
-| In the game | On Zcash |
+| Who | Learns | Never learns |
+| --- | --- | --- |
+| The chain | One shielded transaction per deal; buy-ins and payouts as shielded payments | Who plays, any role, any amount, any memo |
+| Other players | Your seat, your claims, and a role **only if you prove it** | Your wallet, other outputs, your viewing key |
+| The narrator (host's browser) | Every role, like the human narrator in Mafia | Your viewing key |
+| The relay | Room codes, message sizes and timing, and which deal txids are looked up | Roles, moves, chat, votes, addresses (all end-to-end sealed) |
+| Block explorers, analytics, CDNs | **Nothing.** The page's CSP allows only itself and the relay. | |
+
+- **No block explorer.** Transactions are read straight from Zcash lightwalletd (zec.rocks, NA and EU) through the relay's `/tx`. Every browser re-hashes the bytes to the txid it asked for, so not even the relay can swap a transaction.
+- **Viewing keys never leave the tab.** Chits are made in the player's own browser.
+- **Shielded ballots:** only totals are published.
+- **The trust you take on:** the host's browser knows the deal (that's the narrator's job). The commitment on every card proves the narrator never *changed* it, but not that they didn't peek. Play with a host you trust, or let the host sit out.
+
+### 2. Usefulness: would someone use this on Monday?
+
+- **Players:** a party game you can host for friends tonight, with a real pot in ZEC and roles nobody can fake.
+- **Newcomers:** Glasstown (the red TV) is a 3-minute walk through public vs shielded money, then Dark Pool and the river.
+- **Builders:** the pieces are reusable for any hidden-role or sealed-information game:
+  - a **shielded deal**: one multi-recipient ZIP 321 transaction, a secret per player in each encrypted memo;
+  - a **deal commitment** on every card;
+  - **proof of a secret** by single-output disclosure (chit).
+
+### 3. Execution: what is real?
+
+| Real, on Zcash mainnet | |
 | --- | --- |
-| **Buy in** | Each player pays the stake to the table's shielded address. The memo is `ghosttown:<table>:join:<seat>:<name>`. Outsiders cannot see who is playing. |
-| **The deal** | The narrator's wallet pays each player 0.0001 ZEC whose **encrypted memo is their role card**. Only that player's wallet can read it. It is one multi-recipient ZIP 321 request, so the whole deal is one transaction. The app also offers one QR per seat for wallets that do not take multi-recipient requests. |
-| **No cheating narrator** | Every card carries the **deal commitment**: SHA-256 over seats, names, roles and a salt. Each player holds it in their wallet before night one. At the end the salt is revealed and every browser re-hashes the deal. |
-| **Proof of role** | Claims are cheap; proof is not. A player proves their role by pasting a **chit**, a single-output disclosure, for their role-card output, made in their own browser at [chit.nerom.site](https://chit.nerom.site). Every browser at the table verifies it against the deal transaction with the official Zcash crates (`orchard`, `zcash_note_encryption`), compiled to WebAssembly. A Leaker can say "I am the Auditor" but can never prove it. |
-| **Shielded ballot** | Only the tally is published. Who voted for whom never is. |
-| **The pot** | The winners split the stakes in one ZIP 321 payout from the table wallet. It can be published as a Chit payout ledger anyone can audit. |
+| Table **EAS24** | Dealt Oct 28 2026 in tx `d3433a762197fddb05589c2e5ad20d6624fec9f19889e1984a8205c8cfc68c57` (block 3,533,398): 2 role cards, 1 transaction. Its Auditor proved her card live. See `#/gallery` and `#/tour`. |
 
-## Two ways to play
+**Also real:**
+- the game engine;
+- lying bots;
+- per-seat views;
+- encrypted multiplayer through the relay;
+- ZIP 321 buy-in, deal and payout requests;
+- buy-in checks with the host's viewing key;
+- proof checks with the official `orchard` and `zcash_note_encryption` crates (WASM, via chit-zcash).
 
-- **Practice table** (`#/practice`): you against 4–7 bots, in your tab.
-  - The bots claim, accuse and lie. Leaker bots fake an Auditor claim and frame a Citizen. A real Auditor bot proves its card when it finds a Leaker.
-  - Your role card and its proof use the **specimen deal**: a real, fully proven v6 Ironwood transaction with five role-card outputs. It is funded from nothing, so it is **not on chain**, and it is always labelled specimen. The proof you see is a real cryptographic verification.
-- **Staked table** (`#/host`): friends on phones, real ZEC.
-  1. **Open a table.** The host's browser is the narrator.
-  2. **Join and buy in.** Friends join with an invite link and buy in from Zodl with a ZIP 321 QR. The host's tab can confirm buy-ins on chain with the host's viewing key, which stays in that tab.
-  3. **Deal.** The host deals with one QR, and every player's card arrives in their wallet.
-  4. **Play.** Moves travel through a relay, end-to-end encrypted. Empty seats are filled by bots.
+**Specimen (always labelled):** the practice table's deal is a real, fully proven v6 Ironwood transaction funded from nothing, so it is not on chain.
 
-## Architecture
+**Simulated, and said so on the page:**
+- Three Lanterns' coin;
+- the Auditor's Desk ledger (a teaching puzzle, not real wallets);
+- Glasstown's wallets.
+
+**Tests:** `cd web && npx vitest run` runs **47 tests**.
+- The mainnet deal hashes to its txid; both shown chits prove their seats.
+- Five forgeries are rejected: wrong seat, wrong table, changed commitment, edited chit, replay.
+- All five specimen cards prove.
+- 1,500 bot-vs-bot games end with a valid deal.
+- Per-seat secrecy: a Citizen sees only themself; Leakers see each other; only the Auditor reads the notebook.
+- Cracked shields; win conditions.
+- Lanterns: a lie never matches the commitment.
+- The Desk: 300 random puzzles are all solvable.
+
+### 4. Originality
+
+- Role cards *are* shielded memos.
+- "Claims are cheap, proof isn't" is enforced by Zcash disclosure: a Leaker can say "I'm the Auditor" but can never prove it.
+- The Shielder's night is an arcade game, Dark Pool: carrying coins out of the glass and into the shielded pool.
+- The Watcher's lie in Three Lanterns is caught by your own browser.
+- None of it was ported from an earlier project. Glasstown, the side trip, began as our Oct 3 onboarding bounty entry and was rebuilt here as a district of the town.
+
+## The town
+
+| Door | What it is | Zcash idea |
+| --- | --- | --- |
+| **Séance Hall** | The table: practice against bots, or staked with friends | Shielded role cards, commitments, chit proofs, shielded ballots |
+| **Staked Tables** | Host, invite, buy in from Zodl, deal in one transaction | ZIP 321, multi-recipient deal |
+| **Three Lanterns** | A shell game; the Watcher commits first and sometimes lies | Commit, then reveal |
+| **Auditor's Desk** | Three unlabelled viewing keys, eight sealed payments | Viewing keys open only their own wallet; incoming notes hide the sender |
+| **Arcade** | Dark Pool | Shielding: out of the glass, into the pool |
+| **Glass Gallery** | The EAS24 deal from the glass side, beside the cards opened with chits | What the chain shows vs what a chit shows |
+| **Ghost Radio** | The town anthem | |
+| **Glasstown** | A 3-minute side trip across the river | Public vs shielded; your identity becomes your ghost |
+| **Judges' tour** (`#/tour`) | Ten live checks, four forgeries | All of the above, in 90 seconds |
+
+## How a staked table works
+1. **Open a table.** The host opens it; their browser becomes the narrator.
+2. **Join and buy in.** Friends join by invite link and buy in from Zodl (ZIP 321, memo `ghosttown:<table>:join:<seat>:<name>`). The host's tab can confirm buy-ins with the host's viewing key.
+3. **Deal.** The host deals: one ZIP 321 request pays each player 0.0001 ZEC with their role card as the encrypted memo, and every card carries the deal commitment.
+4. **Play.** Moves are sealed end to end (X25519 + XChaCha20-Poly1305) through a relay that sees only ciphertext.
+5. **Prove a role.** Anyone can prove theirs: make a chit for their role-card output in their own browser and paste it. Every browser verifies it against the deal transaction.
+6. **End.** The salt is revealed and every browser re-checks the commitment. The winners are paid with one ZIP 321 request.
+
+## Layout
 
 ```
-web/            Vite + TypeScript, no framework, strict CSP
-  engine.ts     the game: deal + commitment, nights, shielded ballot, win checks, bots, per-seat views
-  runner.ts     plays bots on a human clock and resolves phases (practice tables and staked hosts)
-  zec.ts        role-card memos, ZIP 321 builders, Blockchair fetch, proof of role (chit-zcash WASM)
-  net.ts        X25519 + XChaCha20-Poly1305 sealing; relay client
-  staked.ts     host lobby, deal, narrator, guest, payout
-  table.ts      the table UI, rendered from a View (what one seat may know)
-relay/          ~90 lines of Node `ws`: routes opaque ciphertext by room code, stores nothing
-specimen/       Rust tool that builds the specimen deal transaction and its chits (uses chit-core)
+web/
+  hub.ts         the street: every TV is a door
+  engine.ts      deal + commitment, nights, Dark Pool shields, shielded ballot, wins, bots, per-seat views
+  table.ts       the table UI; the Shielder's night is Dark Pool
+  staked.ts      host lobby, deal, narrator, guest, payout
+  zec.ts         role-card memos, ZIP 321, transactions from the relay (lightwalletd), proof of role
+  tour.ts        the judges' tour
+  gallery.ts     Glass Gallery
+  lanterns.ts    Three Lanterns
+  desk.ts        Auditor's Desk
+  door.ts        Glasstown (glasstown.html), with glass/ (the Glasstown modules)
+relay/
+  server.js      routes sealed messages by room; GET /tx
+  lwd.js         lightwalletd gRPC, three servers, no explorer, no logs
+specimen/        Rust tool that builds the practice deal and its chits (chit-core)
 ```
 
-- **Per-seat views.** The narrator never sends the whole game to anyone. `viewFor(game, seat)` gives each seat only:
-  - its own role;
-  - a Leaker's partners;
-  - the Auditor's own notebook;
-  - the roles that are public: exposed, proven, or revealed at the end.
-- **Encrypted transport.**
-  - Each guest's tab makes an X25519 key, and the host's public key is in the invite link.
-  - Every message is sealed with XChaCha20-Poly1305 under `SHA-256(shared secret ‖ table code)`.
-  - The relay sees room codes, sizes and timing. It never sees roles, moves, chat, addresses or votes.
-- **Determinism.** The deal and every tie-break come from a seed, so the outcome can be replayed. The commitment binds the deal.
-- **Tests:**
-  - **Engine:** role counts; the commitment and its tamper checks; shields; ballots; 1,500 complete bot-only games at 5–10 seats, each ending with a winner and a valid deal, with neither side dominating.
-  - **Zcash layer:** role cards fit a 512-byte memo and parse back exactly, and ZIP 321 requests are built correctly, both single and multi-recipient.
-
-```
-cd web && npm install && npm test && npm run dev
+```bash
+cd web && npm i && npx vitest run && npm run dev      # http://localhost:5300
+cd relay && npm i && npm start                          # :8080
 ```
 
-## What is real and what is not
+## Not built
+- **Automatic payout signing:** the host scans one ZIP 321 request.
+- **Night actions as on-chain memos:** moves go through the relay for speed. The deal, the commitment and the proofs are what bind the game to the chain.
+- **A narrator who can't peek:** that would need mental-poker-style dealing.
 
-- **Real:**
-  - the game engine, bots, and the encrypted multiplayer over the live relay;
-  - role-card memos, ZIP 321 requests (buy-in, deal, payout), and on-chain buy-in checks with a viewing key;
-  - proof-of-role verification with the official Zcash crates.
-- **Specimen:**
-  - The practice table's deal transaction is real and fully proven, but it is not on chain. It is labelled everywhere.
-- **Trusted:**
-  - The narrator (the host's browser) knows every role, like a human narrator in Mafia.
-  - The commitment proves the narrator never changed the deal. It does not stop the narrator from peeking, so play with a host you trust, or a host who sits out.
-- **Not built:**
-  - Automatic payout signing. The host scans one ZIP 321 request.
-  - Night actions as on-chain memos. Moves go through the relay for speed. The commitment and proofs are what bind the game to the chain.
-
-Built for ZECATHON (Wildcard). Proofs by [chit-zcash](https://github.com/neromtoobad/chit). Characters: original pixel "shielded identities" in the zkSNARKs style.
-
-MIT OR Apache-2.0.
+Proofs by [chit-zcash](https://github.com/neromtoobad/chit). Characters are original pixel "shielded identities". The short film in the video was generated from the game's own art.
