@@ -121,10 +121,3 @@ specimen/        Rust tool that builds the practice deal and its chits (chit-cor
 cd web && npm i && npx vitest run && npm run dev      # http://localhost:5300
 cd relay && npm i && npm start                          # :8080
 ```
-
-## Not built
-- **Automatic payout signing:** the host scans one ZIP 321 request.
-- **Night actions as on-chain memos:** moves go through the relay for speed. The deal, the commitment and the proofs are what bind the game to the chain.
-- **A narrator who can't peek:** that would need mental-poker-style dealing.
-
-Proofs by [chit-zcash](https://github.com/neromtoobad/chit). Characters are original pixel "shielded identities". The short film in the video was generated from the game's own art.
