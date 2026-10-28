@@ -450,3 +450,20 @@ input.masked { -webkit-text-security: disc; }
   .hub-head { flex-direction: column; align-items: flex-start; }
   .nightfall b { font-size: 44px; }
 }
+
+/* ---------- badges and the daily Desk ---------- */
+.badge-strip { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; margin-top: 4px; }
+.badge { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 6px; font-size: 14px; background: #0b0d14; border: 1px solid var(--line); filter: grayscale(1); opacity: .35; }
+.badge.on { filter: none; opacity: 1; border-color: rgba(124,245,168,.5); box-shadow: 0 0 10px rgba(124,245,168,.2); }
+.badge-strip.small .badge { width: 20px; height: 20px; font-size: 11px; }
+.badge-count { font: 500 11px var(--mono); color: var(--mute); margin-left: 4px; }
+.badge-toast { position: fixed; right: 16px; bottom: 16px; z-index: 1200; display: flex; gap: 12px; align-items: center; padding: 12px 16px; border-radius: 10px; background: #0d1a12; border: 1px solid var(--shield); box-shadow: 0 0 40px rgba(124,245,168,.3); animation: rise .3s ease both; transition: opacity .5s, transform .5s; }
+.badge-toast.out { opacity: 0; transform: translateY(10px); }
+.badge-toast .bt-icon { font-size: 26px; } .badge-toast small { display: block; font: 500 10.5px var(--mono); letter-spacing: .14em; text-transform: uppercase; color: var(--shield); } .badge-toast b { font: 900 18px var(--display); }
+.desk-tabs { display: flex; gap: 8px; margin: 4px 0 10px; }
+.desk-tab { padding: 8px 14px; border-radius: 999px; border: 1px solid var(--line-2); background: transparent; color: var(--mute); font: 600 13px var(--mono); cursor: pointer; }
+.desk-tab.on { color: var(--ink, #05060a); background: var(--lantern); border-color: var(--lantern); }
+.desk-result:empty { display: none; }
+.desk-result { margin: 0 0 18px; padding: 14px 16px; border: 1px solid var(--lantern); border-radius: 10px; background: #15110a; }
+.share-card { font: 15px/1.5 var(--mono); color: var(--bone); white-space: pre-wrap; margin: 8px 0 12px; }
+@media (max-width: 760px) { .badge-toast { left: 10px; right: 10px; bottom: 76px; } }

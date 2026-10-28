@@ -56,7 +56,7 @@ ZECATHON 2026 · Wildcard · MIT or Apache-2.0.
 - the Auditor's Desk ledger (a teaching puzzle, not real wallets);
 - Glasstown's wallets.
 
-**Tests:** `cd web && npx vitest run` runs **47 tests**.
+**Tests:** `cd web && npx vitest run` runs **51 tests**.
 - The mainnet deal hashes to its txid; both shown chits prove their seats.
 - Five forgeries are rejected: wrong seat, wrong table, changed commitment, edited chit, replay.
 - All five specimen cards prove.
@@ -64,7 +64,7 @@ ZECATHON 2026 · Wildcard · MIT or Apache-2.0.
 - Per-seat secrecy: a Citizen sees only themself; Leakers see each other; only the Auditor reads the notebook.
 - Cracked shields; win conditions.
 - Lanterns: a lie never matches the commitment.
-- The Desk: 300 random puzzles are all solvable.
+- The Desk: 300 random puzzles and a year of daily puzzles are all solvable; a day's puzzle is the same for everyone; the share text never gives away the answer.
 
 ### 4. Originality
 
@@ -81,11 +81,12 @@ ZECATHON 2026 · Wildcard · MIT or Apache-2.0.
 | **Séance Hall** | The table: practice against bots, or staked with friends | Shielded role cards, commitments, chit proofs, shielded ballots |
 | **Staked Tables** | Host, invite, buy in from Zodl, deal in one transaction | ZIP 321, multi-recipient deal |
 | **Three Lanterns** | A shell game; the Watcher commits first and sometimes lies | Commit, then reveal |
-| **Auditor's Desk** | Three unlabelled viewing keys, eight sealed payments | Viewing keys open only their own wallet; incoming notes hide the sender |
+| **Auditor's Desk** | Three unlabelled viewing keys, eight sealed payments. A **daily** puzzle (the same for everyone each UTC day) with a shareable, spoiler-free result, plus endless practice | Viewing keys open only their own wallet; incoming notes hide the sender |
 | **Arcade** | Dark Pool | Shielding: out of the glass, into the pool |
 | **Glass Gallery** | The EAS24 deal from the glass side, beside the cards opened with chits | What the chain shows vs what a chit shows |
 | **Ghost Radio** | The town anthem in three versions (UK drill, UK rap, Afrobeats), with the words in time and a visualiser; the ♪ in the header keeps it playing as you walk | |
 | **Glasstown** | A 3-minute side trip across the river | Public vs shielded; your identity becomes your ghost |
+| **Badges** | Nine marks on your ghost, earned around the town (prove a role, hold a shield, catch his lie, solve the daily…), kept only in your browser | |
 | **Judges' tour** (`#/tour`) | Ten live checks, four forgeries | All of the above, in 90 seconds |
 
 ## How a staked table works

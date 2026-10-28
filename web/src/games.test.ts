@@ -1,7 +1,7 @@
 // The hub's mini-games: Three Lanterns' commitment, and the Auditor's Desk puzzles.
 import { describe, expect, it } from 'vitest';
 import { commit } from './lanterns';
-import { opens, puzzle } from './desk';
+import { dailyRng, dayNumber, opens, puzzle, shareText } from './desk';
 import { DOORS } from './hub';
 
 describe('Three Lanterns', () => {
@@ -48,6 +48,33 @@ describe("the Auditor's Desk", () => {
       for (const o of p.owners) expect(p.pays.filter((x) => opens(x, o)).length).toBeGreaterThanOrEqual(2);
       for (const x of p.pays) expect(p.owners.some((o) => opens(x, o))).toBe(true);
     }
+  });
+});
+
+describe('the daily Desk', () => {
+  const key = (p: ReturnType<typeof puzzle>) => JSON.stringify([p.suspects.map((s) => s.addr), p.leaker.name, p.pays.map((x) => [x.zec, x.memo])]);
+  it('numbers days from Oct 28 2026', () => {
+    expect(dayNumber(Date.UTC(2026, 9, 28, 0, 0, 1))).toBe(1);
+    expect(dayNumber(Date.UTC(2026, 9, 28, 23, 59))).toBe(1);
+    expect(dayNumber(Date.UTC(2026, 9, 29, 0, 0, 1))).toBe(2);
+  });
+  it('is the same puzzle for everyone on a day, and a new one the next day', () => {
+    expect(key(puzzle(dailyRng(7)))).toBe(key(puzzle(dailyRng(7))));
+    expect(key(puzzle(dailyRng(7)))).not.toBe(key(puzzle(dailyRng(8))));
+  });
+  it('every daily for the next year is solvable', () => {
+    for (let d = 1; d <= 365; d++) {
+      const p = puzzle(dailyRng(d));
+      const w = p.pays.find((x) => x.watcher)!;
+      expect(p.owners.filter((o) => opens(w, o))).toEqual([p.leaker]);
+    }
+  });
+  it('shares a trail, never the answer', () => {
+    const t = shareText(3, true, ['⬛', '🗝', '⬛', '🗝', '❌', '👻']);
+    expect(t).toContain('Auditor’s Desk #3');
+    expect(t).toContain('in 4 tries');
+    expect(t).toContain('⬛🗝⬛🗝❌👻');
+    expect(shareText(3, false, ['⬛'])).toContain('got away');
   });
 });
 

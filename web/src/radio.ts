@@ -4,6 +4,7 @@
 
 import { h } from './dom';
 import { watcher } from './two';
+import { earn } from './badges';
 
 type Line = [number, number, string];
 interface Track { id: string; title: string; style: string; src: string; lyrics: Line[] }
@@ -101,6 +102,7 @@ export async function play(id?: string) {
     } catch { /* the music still plays without the visualiser */ }
   }
   await a.play().catch(() => {});
+  if (!a.paused) earn('radio');
   emit();
 }
 export const pause = () => audio?.pause();

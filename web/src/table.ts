@@ -9,6 +9,7 @@ import { CARD_TEXT, type ProofResult } from './zec';
 import { darkPool } from './glass/game';
 import { myGhost, watcher, WATCHER_SAYS } from './two';
 import { sfx } from './sound';
+import { badgeStrip, earn } from './badges';
 import './glass/pool.css';
 
 export interface Controller {
@@ -120,6 +121,7 @@ export function renderTable(root: HTMLElement, ctl: Controller, onLeave: () => v
         h('span', { class: 'kicker' }, ctl.practice ? 'Your role card · specimen memo' : 'Your role card · shielded memo'),
         h('p', { class: 'memo-text' }, `You are ${CARD_TEXT[v.myRole]}`),
         h('p', { class: 'memo-deal' }, `deal: ${short(v.commitment, 12, 8)}`),
+        badgeStrip(true),
         v.myRole === 'leaker' ? h('p', { class: 'memo-private watcher-line' }, watcher('read', 2), WATCHER_SAYS.card) : null,
         partners.length ? h('p', { class: 'memo-private' }, `Your fellow Leaker${partners.length > 1 ? 's' : ''}: ${partners.map((p) => p.name).join(', ')}`) : null,
         v.audits.length ? h('div', { class: 'notebook' }, h('span', { class: 'kicker' }, "Auditor's notebook"), ...v.audits.map((a) => h('p', {}, `Night ${a.round}: ${name(a.seat)} is `, h('b', { class: a.leaker ? 'bad' : 'ok' }, a.leaker ? 'a LEAKER' : 'not a Leaker')))) : null,
@@ -195,7 +197,7 @@ export function renderTable(root: HTMLElement, ctl: Controller, onLeave: () => v
       else if (e.kind === 'proof') sfx.fanfare();
       else if (e.kind === 'tally') sfx.tally();
       else if (e.kind === 'quiet') sfx.ding();
-      else if (e.kind === 'over') (v.winner && (TEAM[v.myRole] === v.winner || (v.myRole === 'glitch' && v.glitchWon)) ? sfx.fanfare() : sfx.lose());
+      else if (e.kind === 'over') { const won = !!v.winner && (TEAM[v.myRole] === v.winner || (v.myRole === 'glitch' && v.glitchWon)); if (won) earn('winner'); else sfx.lose(); }
     }
     const nightfall = fresh.find((e) => e.kind === 'night');
     if (nightfall && seenLog > 1) setTimeout(() => showNight(nightfall.round), big ? 3900 : 0);
@@ -274,7 +276,7 @@ export function renderTable(root: HTMLElement, ctl: Controller, onLeave: () => v
           stop();
           modal.remove();
           proofOpen = false;
-          if (held) ctl.act(target);
+          if (held) { earn('darkpool'); ctl.act(target); }
           else ctl.crack?.();
         }, 1800);
       },
@@ -311,7 +313,7 @@ export function renderTable(root: HTMLElement, ctl: Controller, onLeave: () => v
           r.problem ? h('p', { class: 'error' }, r.problem) : h('p', { class: 'ok-line' }, `✓ Proved: ${ROLE_NAME[r.card!.role]}. The whole table now knows it is true.`),
           ].filter((x) => x !== null) as Node[]),
         );
-        if (!r.problem) setTimeout(close, 2200);
+        if (!r.problem) { earn('proved'); setTimeout(close, 2200); }
       } catch (e) {
         out.replaceChildren(h('p', { class: 'error' }, e instanceof Error ? e.message : String(e)));
       }

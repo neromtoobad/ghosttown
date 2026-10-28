@@ -5,6 +5,8 @@
 import { h, art } from './dom';
 import { myGhost } from './two';
 import { bindRadio, playing } from './radio';
+import { badgeStrip, earn } from './badges';
+import { fromGlasstown } from './two';
 
 interface Door {
   id: string;
@@ -53,11 +55,12 @@ export function hub(): HTMLElement {
   const pulse = () => street.querySelector('.door.d-radio')?.classList.toggle('on', playing());
   pulse();
   bindRadio(street, pulse);
+  if (fromGlasstown()) earn('glasstown');
   const ghost = myGhost(4);
   return h(
     'section',
     { class: 'hub' },
-    h('div', { class: 'hub-head' }, h('div', {}, h('p', { class: 'eyebrow' }, 'A shielded town on Zcash'), h('h1', {}, 'GHOST ', h('em', {}, 'TOWN'))), h('div', { class: 'row' }, h('a', { class: 'btn', href: '#/tour' }, 'Judges: try to cheat it · 90 s'), ghost ? h('div', { class: 'town-me' }, ghost, h('span', {}, 'You, from Glasstown')) : h('a', { class: 'btn primary', href: '#/practice' }, 'Take a seat at the table'))),
+    h('div', { class: 'hub-head' }, h('div', {}, h('p', { class: 'eyebrow' }, 'A shielded town on Zcash'), h('h1', {}, 'GHOST ', h('em', {}, 'TOWN'))), h('div', { class: 'row' }, h('a', { class: 'btn', href: '#/tour' }, 'Judges: try to cheat it · 90 s'), ghost ? h('div', { class: 'town-me' }, ghost, h('div', {}, h('span', {}, 'Your ghost'), badgeStrip())) : h('a', { class: 'btn primary', href: '#/practice' }, 'Take a seat at the table'))),
     street,
     h('div', { class: 'doors' }, ...DOORS.map((d) => h('a', { class: `door-card${d.tone === 'red' ? ' red' : ''}${d.tone === 'hall' ? ' hall' : ''}`, href: d.href }, h('b', {}, d.name), h('span', {}, d.line)))),
   );

@@ -8,6 +8,7 @@ import { bytesToHex, utf8ToBytes } from '@noble/hashes/utils';
 import { h, short, sleep } from './dom';
 import { watcher } from './two';
 import { sfx } from './sound';
+import { earn } from './badges';
 
 export const NAMES = ['A', 'B', 'C'];
 /** The Watcher's commitment to the lantern hiding the coin: SHA-256 of the lantern and a secret salt. */
@@ -80,7 +81,7 @@ export function lanternsView(): HTMLElement {
         h('span', {}, 'commitment'), h('code', {}, short(c, 14, 8))),
       h('p', { class: ok ? 'ok-line' : 'error big-verdict' }, ok ? `✓ The hashes match. The Watcher played it straight.${pick === coin ? ' You found the coin.' : ' The coin was not under yours.'}` : '✕ The hashes don’t match. The Watcher tried to move the coin after the fact. The round is yours.'),
     );
-    if (lie) sfx.shield(); else if (pick === coin) sfx.fanfare(); else sfx.buzz();
+    if (lie) { sfx.shield(); earn('liar'); } else if (pick === coin) sfx.fanfare(); else sfx.buzz();
     if (lie) {
       say.innerHTML = 'Ah… it was under that one. Obviously.';
       await sleep(1600);

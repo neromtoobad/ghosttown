@@ -12,6 +12,7 @@ import { alive, botDay, botNight, botVote, newGame, nightPending, openVote, reso
 import { fetchTx, parseCard, proveRole, specimen, TX_SOURCE } from './zec';
 import { ROLE_NAME } from './table';
 import { watcher } from './two';
+import { earn } from './badges';
 
 type Outcome = { ok: boolean; detail: string };
 interface Check { title: string; why: string; expect: 'pass' | 'reject'; run: (ctx: Ctx) => Promise<Outcome> }
@@ -98,6 +99,7 @@ export function tourView(): HTMLElement {
       await sleep(450);
     }
     summary.replaceChildren(h('p', { class: good === CHECKS.length ? 'ok-line big-verdict' : 'error big-verdict' }, good === CHECKS.length ? `✓ ${good}/${CHECKS.length}. Every proof held, every forgery failed, nothing left this page but a lookup to Zcash.` : `${good}/${CHECKS.length} behaved as expected.`));
+    if (good === CHECKS.length) earn('tour');
     go.textContent = 'Run it again';
     go.removeAttribute('disabled');
   });

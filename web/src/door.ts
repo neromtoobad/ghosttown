@@ -15,6 +15,7 @@ import { state, save, begin, complete } from './glass/state';
 import { drawIdentity, playerNumber, castPortrait } from './glass/identity';
 import { runLesson, type LessonDef } from './glass/lesson';
 import { darkPool } from './glass/game';
+import { earn } from './badges';
 
 const wallet = (kind: 'glass' | 'dark', rows: [string, string][]) =>
   h('div', { class: `wallet ${kind}` },
@@ -107,6 +108,7 @@ async function walk() {
   complete(1, 100);
   state.finishedAt ??= Date.now();
   save();
+  earn('glasstown');
   location.hash = '#/river';
 }
 

@@ -12,6 +12,7 @@ import { fromGlasstown, myGhost, watcher } from './two';
 import { hub } from './hub';
 import { radioButton, radioView } from './radio';
 import { soundButton } from './sound';
+import { badgeStrip, earn } from './badges';
 import { lanternsView } from './lanterns';
 import { deskView } from './desk';
 import { tourView } from './tour';
@@ -60,7 +61,7 @@ function arcade() {
   const host = h('div', { class: 'pool-root pool-play arcade-cab' });
   const out = h('p', { class: 'hint' }, `Best: ${(glassState.best ?? 0).toFixed(2)} ZEC made private`);
   shell(h('section', { class: 'arcade' }, h('p', { class: 'eyebrow' }, 'Arcade · Dark Pool'), h('h1', {}, 'Out of the glass.'), h('p', { class: 'muted' }, "Pick up coins in the glass district and carry them into the dark pool. Whatever you carry is public, so the Watcher's drones spot you from further away. It's what the Shielder plays every night at the table."), host, out));
-  const stop = darkPool(host, { seconds: 45, onEnd: (r) => (out.textContent = `${r.shielded.toFixed(2)} ZEC made private, ${r.doxxed.toFixed(2)} lost to the drones. Best ${r.best.toFixed(2)}${r.isBest ? ' (new best!)' : ''}.`) });
+  const stop = darkPool(host, { seconds: 45, onEnd: (r) => (r.shielded > 0 && earn('darkpool'), out.textContent = `${r.shielded.toFixed(2)} ZEC made private, ${r.doxxed.toFixed(2)} lost to the drones. Best ${r.best.toFixed(2)}${r.isBest ? ' (new best!)' : ''}.`) });
   leave = stop;
 }
 
@@ -74,7 +75,7 @@ function practiceSetup() {
       h('img', { class: 'setup-art', src: art('night-auditor.png'), alt: '' }),
       h('p', { class: 'eyebrow' }, 'Practice table'),
       h('h1', {}, 'Take a seat.'),
-      myGhost(5) ? h('div', { class: 'town-me' }, myGhost(5)!, h('span', {}, 'You sit as the ghost you earned in Glasstown.')) : h('p', { class: 'hint' }, h('a', { href: '/glasstown.html' }, 'New here? Walk through Glasstown first'), ' (3 min): you earn the ghost you play as.'),
+      myGhost(5) ? h('div', { class: 'town-me' }, myGhost(5)!, h('span', {}, 'You sit as the ghost you earned in Glasstown.'), badgeStrip(true)) : h('p', { class: 'hint' }, h('a', { href: '/glasstown.html' }, 'New here? Walk through Glasstown first'), ' (3 min): you earn the ghost you play as.'),
       h('p', { class: 'muted' }, 'You and a table of bots. The bots claim, accuse and lie. Your role card and its proof run against the specimen deal: a real, proven Zcash transaction that is not on chain.'),
       h('label', {}, 'Name'),
       name,
