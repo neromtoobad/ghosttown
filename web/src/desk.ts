@@ -7,6 +7,7 @@ import { h, short } from './dom';
 import { portrait } from './pixel';
 import { BOT_NAMES } from './practice';
 import { watcher } from './two';
+import { sfx } from './sound';
 
 const B32 = 'qpzry9x8gf2tvdw0s3jn54khce6mua7l';
 const addr = (r: () => number) => 'u1' + Array.from({ length: 58 }, () => B32[Math.floor(r() * 32)]).join('');
@@ -77,10 +78,12 @@ export function deskView(): HTMLElement {
     const owner = P.owners[key];
     if (opens(p, owner)) {
       opened.set(p.id, key);
+      if (p.watcher) sfx.dox(); else sfx.ding();
       say.innerHTML = p.watcher ? 'That’s <b>mine</b>. Six-six-six for a job well done. Now: whose wallet received it?' : 'Ordinary ghost business. Keep looking.';
     } else {
       if (!missed.has(p.id)) missed.set(p.id, new Set());
       missed.get(p.id)!.add(key);
+      sfx.buzz();
       say.innerHTML = 'That key opens <b>nothing</b> in this payment. Viewing keys only see their own wallet.';
     }
     if (tries >= TRIES && !over) { over = true; say.innerHTML = `Dawn. You ran out of time. My Leaker was <b>${P.leaker.name}</b>.`; }
@@ -89,9 +92,9 @@ export function deskView(): HTMLElement {
   function accuse(s: Wallet) {
     if (over) return;
     accusations++;
-    if (s === P.leaker) { over = true; say.innerHTML = `…<b>${s.name}</b>. You traced my payment to their address. Well audited.`; }
-    else if (accusations >= 3) { over = true; say.innerHTML = `Three wrong accusations. The town stops trusting the Auditor. It was <b>${P.leaker.name}</b>.`; }
-    else say.innerHTML = `${s.name} is just a citizen. You’re guessing, Auditor.`;
+    if (s === P.leaker) { sfx.fanfare(); over = true; say.innerHTML = `…<b>${s.name}</b>. You traced my payment to their address. Well audited.`; }
+    else if (accusations >= 3) { sfx.lose(); over = true; say.innerHTML = `Three wrong accusations. The town stops trusting the Auditor. It was <b>${P.leaker.name}</b>.`; }
+    else { sfx.buzz(); say.innerHTML = `${s.name} is just a citizen. You’re guessing, Auditor.`; }
     draw();
   }
   const reset = () => { P = puzzle(); key = null; tries = 0; accusations = 0; over = false; opened.clear(); missed.clear(); say.innerHTML = 'I paid one of these ghosts last night. Eight sealed payments. Three keys. Good luck.'; draw(); };

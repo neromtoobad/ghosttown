@@ -84,7 +84,7 @@ ZECATHON 2026 · Wildcard · MIT or Apache-2.0.
 | **Auditor's Desk** | Three unlabelled viewing keys, eight sealed payments | Viewing keys open only their own wallet; incoming notes hide the sender |
 | **Arcade** | Dark Pool | Shielding: out of the glass, into the pool |
 | **Glass Gallery** | The EAS24 deal from the glass side, beside the cards opened with chits | What the chain shows vs what a chit shows |
-| **Ghost Radio** | The town anthem | |
+| **Ghost Radio** | The town anthem in three versions (UK drill, UK rap, Afrobeats), with the words in time and a visualiser; the ♪ in the header keeps it playing as you walk | |
 | **Glasstown** | A 3-minute side trip across the river | Public vs shielded; your identity becomes your ghost |
 | **Judges' tour** (`#/tour`) | Ten live checks, four forgeries | All of the above, in 90 seconds |
 

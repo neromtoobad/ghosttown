@@ -404,3 +404,49 @@ input.masked { -webkit-text-security: disc; }
 .tour-step.good { border-color: rgba(124,245,168,.6); background: #0a130e; } .tour-step.good::before { content: '✓'; color: var(--shield); font-size: 16px; }
 .tour-step.bad { border-color: var(--leak); background: #170a0e; } .tour-step.bad::before { content: '✕'; color: var(--leak); font-size: 16px; }
 .nav-tour { color: var(--lantern) !important; }
+
+/* ---------- Ghost Radio ---------- */
+.radio-btn { border: 1px solid var(--line-2); background: transparent; color: var(--mute); font: 600 13px var(--mono); padding: 5px 10px; border-radius: 999px; cursor: pointer; }
+.radio-btn.on { color: var(--shield); border-color: var(--shield); box-shadow: 0 0 18px rgba(124,245,168,.3); animation: tvpulse .4286s ease-in-out infinite alternate; }
+.radio { max-width: 900px; margin: 0 auto; padding-bottom: 40px; }
+.radio h1 em { font-style: normal; color: var(--leak); }
+.radio-tv { position: relative; margin: 16px 0; border-radius: 22px; padding: 18px; background: linear-gradient(160deg, #1a1d22, #0c0d10); box-shadow: inset 0 0 0 3px #2a2e36, 0 30px 80px -30px rgba(0,0,0,.9); }
+.radio-viz { display: block; width: 100%; height: auto; border-radius: 12px; image-rendering: pixelated; box-shadow: inset 0 0 40px rgba(124,245,168,.15); }
+.radio-now { display: flex; gap: 12px; align-items: baseline; margin: 14px 4px 4px; }
+.radio-now b { font: 900 28px var(--display); color: var(--shield); } .radio-now span { font: 500 12px var(--mono); color: var(--mute); letter-spacing: .12em; text-transform: uppercase; }
+.karaoke { min-height: 118px; padding: 8px 4px; }
+.karaoke p { margin: 4px 0; font: 600 15px var(--sans); color: #4b5068; transition: color .2s; }
+.karaoke p.cur { font: 900 26px/1.2 var(--display); color: var(--bone); text-shadow: 0 0 24px rgba(255,77,94,.35); }
+.radio-progress { height: 4px; background: #1c1f2a; border-radius: 2px; overflow: hidden; } .radio-progress i { display: block; height: 100%; background: var(--leak); }
+.radio-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin: 16px 0 20px; }
+.radio-track { display: grid; gap: 2px; text-align: left; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--night-2); color: var(--text); cursor: pointer; }
+.radio-track b { font: 900 17px var(--display); } .radio-track span { font: 500 12px var(--mono); color: var(--mute); }
+.radio-track.on { border-color: var(--shield); } .radio-track.on b { color: var(--shield); }
+@media (max-width: 700px) { .radio-list { grid-template-columns: 1fr; } .karaoke p.cur { font-size: 20px; } }
+
+/* ---------- the coach and nightfall ---------- */
+.coach { display: flex; align-items: center; gap: 10px; width: 100%; margin: 0 0 14px; padding: 10px 14px; border: 1px solid var(--line-2); border-radius: 8px; background: rgba(11,13,20,.92); color: var(--text); font: 600 14px var(--sans); text-align: left; cursor: pointer; backdrop-filter: blur(6px); }
+.coach-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--lantern); box-shadow: 0 0 12px var(--lantern); flex: none; animation: tvpulse .8s ease-in-out infinite alternate; }
+.coach.ph-night { border-color: rgba(169,155,255,.45); } .coach.ph-night .coach-dot { background: var(--audit); box-shadow: 0 0 12px var(--audit); }
+.coach.ph-vote { border-color: rgba(255,77,94,.5); } .coach.ph-vote .coach-dot { background: var(--leak); box-shadow: 0 0 12px var(--leak); }
+.coach.ph-over .coach-dot { background: var(--shield); box-shadow: 0 0 12px var(--shield); }
+.nightfall { position: fixed; inset: 0; z-index: 900; display: grid; place-items: center; text-align: center; background: radial-gradient(900px 600px at 50% 40%, #121733, #020309 70%); animation: rise .35s ease both; transition: opacity .6s; pointer-events: none; }
+.nightfall.fade { opacity: 0; }
+.nightfall .moon { display: block; font-size: 80px; color: #e9e6ff; text-shadow: 0 0 60px rgba(169,155,255,.8); }
+.nightfall b { display: block; font: 900 64px var(--display); color: var(--bone); margin-top: 6px; }
+.nightfall p { color: var(--mute); font: 500 14px var(--mono); letter-spacing: .08em; }
+.top-ctl { display: flex; gap: 8px; align-items: center; }
+
+/* ---------- phones ---------- */
+@media (max-width: 760px) {
+  header.top { flex-wrap: wrap; gap: 8px 12px; }
+  .brand b { white-space: nowrap; font-size: 19px; }
+  header.top nav { order: 3; width: 100%; overflow-x: auto; gap: 16px; padding-bottom: 4px; scrollbar-width: none; -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); }
+  header.top nav::-webkit-scrollbar { display: none; }
+  header.top nav a { white-space: nowrap; }
+  header.top nav a:nth-child(3) { display: inline; }
+  .coach { position: fixed; left: 10px; right: 10px; bottom: 10px; width: auto; z-index: 60; margin: 0; box-shadow: 0 10px 30px rgba(0,0,0,.6); }
+  .table { padding-bottom: 70px; }
+  .hub-head { flex-direction: column; align-items: flex-start; }
+  .nightfall b { font-size: 44px; }
+}

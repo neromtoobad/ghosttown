@@ -4,6 +4,7 @@
 
 import { h, art } from './dom';
 import { myGhost } from './two';
+import { bindRadio, playing } from './radio';
 
 interface Door {
   id: string;
@@ -22,20 +23,10 @@ export const DOORS: Door[] = [
   { id: 'arcade', name: 'Arcade', line: 'Dark Pool. Carry coins out of the glass before the drones see.', href: '#/arcade', at: [12.5, 58, 7, 17] },
   { id: 'how', name: 'Rules', line: 'How a round works, and why nobody can cheat it.', href: '#/how', at: [22, 38, 4.2, 14] },
   { id: 'gallery', name: 'Glass Gallery', line: 'A real mainnet deal, seen from the glass side.', href: '#/gallery', at: [85, 5, 8, 17] },
-  { id: 'radio', name: 'Ghost Radio', line: 'The town anthem. Tap to play.', href: '#/radio', at: [84.8, 31, 8, 17] },
+  { id: 'radio', name: 'Ghost Radio', line: 'The town anthem, three versions, the words in time.', href: '#/radio', at: [84.8, 31, 8, 17] },
   { id: 'host', name: 'Staked Tables', line: 'Host a real table: buy in, deal role cards on Zcash.', href: '#/host', at: [83.5, 58, 9, 18] },
   { id: 'glass', name: 'Glasstown', line: "The Watcher's screen. Look across the river, where every wallet is glass.", href: '/glasstown.html', at: [70, 36, 6.5, 17], tone: 'red' },
 ];
-
-let radio: HTMLAudioElement | null = null;
-/** Ghost Radio: the town anthem. Nothing plays until someone taps it. */
-export function toggleRadio(btn?: HTMLElement) {
-  radio ??= Object.assign(new Audio(`${import.meta.env.BASE_URL}audio/ghost-town.mp3`), { loop: true, volume: 0.8 });
-  if (radio.paused) void radio.play();
-  else radio.pause();
-  if (btn) btn.dataset.on = radio.paused ? '' : '1';
-  document.querySelector('.door.d-radio')?.classList.toggle('on', !radio.paused);
-}
 
 export function hub(): HTMLElement {
   const label = h('div', { class: 'street-label' });
@@ -44,7 +35,7 @@ export function hub(): HTMLElement {
     label.classList.toggle('red', d?.tone === 'red');
   };
   show(null);
-  const go = (d: Door) => (d.id === 'radio' ? toggleRadio() : d.href.startsWith('#') ? (location.hash = d.href) : (location.href = d.href));
+  const go = (d: Door) => (d.href.startsWith('#') ? (location.hash = d.href) : (location.href = d.href));
   const street = h(
     'div',
     { class: 'street' },
@@ -59,12 +50,15 @@ export function hub(): HTMLElement {
     }),
     label,
   );
+  const pulse = () => street.querySelector('.door.d-radio')?.classList.toggle('on', playing());
+  pulse();
+  bindRadio(street, pulse);
   const ghost = myGhost(4);
   return h(
     'section',
     { class: 'hub' },
     h('div', { class: 'hub-head' }, h('div', {}, h('p', { class: 'eyebrow' }, 'A shielded town on Zcash'), h('h1', {}, 'GHOST ', h('em', {}, 'TOWN'))), h('div', { class: 'row' }, h('a', { class: 'btn', href: '#/tour' }, 'Judges: try to cheat it · 90 s'), ghost ? h('div', { class: 'town-me' }, ghost, h('span', {}, 'You, from Glasstown')) : h('a', { class: 'btn primary', href: '#/practice' }, 'Take a seat at the table'))),
     street,
-    h('div', { class: 'doors' }, ...DOORS.map((d) => h('a', { class: `door-card${d.tone === 'red' ? ' red' : ''}${d.tone === 'hall' ? ' hall' : ''}`, href: d.href, onclick: (e: Event) => { if (d.id === 'radio') { e.preventDefault(); toggleRadio(e.currentTarget as HTMLElement); } } }, h('b', {}, d.name), h('span', {}, d.line)))),
+    h('div', { class: 'doors' }, ...DOORS.map((d) => h('a', { class: `door-card${d.tone === 'red' ? ' red' : ''}${d.tone === 'hall' ? ' hall' : ''}`, href: d.href }, h('b', {}, d.name), h('span', {}, d.line)))),
   );
 }

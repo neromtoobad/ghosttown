@@ -8,6 +8,7 @@ import { portrait } from './pixel';
 import { CARD_TEXT, type ProofResult } from './zec';
 import { darkPool } from './glass/game';
 import { myGhost, watcher, WATCHER_SAYS } from './two';
+import { sfx } from './sound';
 import './glass/pool.css';
 
 export interface Controller {
@@ -96,7 +97,7 @@ export function renderTable(root: HTMLElement, ctl: Controller, onLeave: () => v
           can ? 'button' : 'div',
           {
             class: `seat${s.alive ? '' : ' dead'}${s.id === v.me ? ' me' : ''}${can ? ' pick' : ''}${s.role ? ` r-${s.role}` : ''}`,
-            ...(can ? { type: 'button', onclick: () => (v.phase !== 'night' ? ctl.vote(s.id) : v.myRole === 'shielder' && ctl.crack ? openPool(s.id, s.name) : ctl.act(s.id)) } : {}),
+            ...(can ? { type: 'button', onclick: () => (sfx.pop(), v.phase !== 'night' ? ctl.vote(s.id) : v.myRole === 'shielder' && ctl.crack ? openPool(s.id, s.name) : ctl.act(s.id)) } : {}),
           },
           h('span', { class: 'seat-art' }, portraitFor(v, s, ctl.table)),
           h('span', { class: 'seat-name' }, s.name),
@@ -166,10 +167,21 @@ export function renderTable(root: HTMLElement, ctl: Controller, onLeave: () => v
       );
     }
 
+    // ---------- the coach: what to do right now ----------
+    const verbing: Partial<Record<Role, string>> = { leaker: 'dox', auditor: 'check', shielder: 'shield (you will run the Dark Pool)' };
+    const coachText =
+      v.phase === 'over' ? 'Game over. Scroll down for the reveal and the deal check.'
+      : !me.alive ? 'You were exposed. Watch the town play it out.'
+      : v.phase === 'night' && v.targets.length ? `Night ${v.round}: tap a ghost to ${verbing[v.myRole] ?? 'act'}.`
+      : v.phase === 'night' ? `Night ${v.round}: you sleep. ${v.waiting} still out in the dark.`
+      : v.phase === 'day' ? (ctl.canCallVote ? 'Day: talk, claim a role, prove yours, then call the vote.' : 'Day: talk, claim a role, prove yours. The host calls the vote.')
+      : v.voted ? `Ballot cast. Waiting for ${v.waiting}. Only totals are published.` : 'Vote: tap the ghost you think is a Leaker, or skip.';
+    const coach = h('button', { class: `coach ph-${v.phase}`, type: 'button', onclick: () => actions.scrollIntoView({ behavior: 'smooth', block: 'center' }) }, h('span', { class: 'coach-dot' }), coachText);
+
     // ---------- feed ----------
     const feed = h('div', { class: 'feed' }, ...v.log.map((e) => feedItem(e, v)).filter(Boolean).reverse() as HTMLElement[]);
 
-    root.replaceChildren(h('div', { class: `table ph-${v.phase}` }, header, h('div', { class: 'table-grid' }, h('div', { class: 'table-main' }, seats, h('div', { class: 'feed-wrap' }, h('span', { class: 'kicker' }, 'The town'), feed)), h('aside', { class: 'table-side' }, card, actions))));
+    root.replaceChildren(h('div', { class: `table ph-${v.phase}` }, header, coach, h('div', { class: 'table-grid' }, h('div', { class: 'table-main' }, seats, h('div', { class: 'feed-wrap' }, h('span', { class: 'kicker' }, 'The town'), feed)), h('aside', { class: 'table-side' }, card, actions))));
     if (focused) chat.focus();
 
     // the morning card for anything new and dramatic
@@ -177,7 +189,27 @@ export function renderTable(root: HTMLElement, ctl: Controller, onLeave: () => v
     seenLog = v.log.length;
     const big = [...fresh].reverse().find((e) => e.kind === 'exposed' || e.kind === 'held' || e.kind === 'quiet' || e.kind === 'over');
     if (big && !proofOpen) showMoment(big, v);
+    for (const e of fresh) {
+      if (e.kind === 'exposed') (e.by === 'dox' ? sfx.dox() : sfx.buzz());
+      else if (e.kind === 'held') sfx.shield();
+      else if (e.kind === 'proof') sfx.fanfare();
+      else if (e.kind === 'tally') sfx.tally();
+      else if (e.kind === 'quiet') sfx.ding();
+      else if (e.kind === 'over') (v.winner && (TEAM[v.myRole] === v.winner || (v.myRole === 'glitch' && v.glitchWon)) ? sfx.fanfare() : sfx.lose());
+    }
+    const nightfall = fresh.find((e) => e.kind === 'night');
+    if (nightfall && seenLog > 1) setTimeout(() => showNight(nightfall.round), big ? 3900 : 0);
   };
+
+  /** Night falls: a moment of dark between the day and the dox. */
+  function showNight(round: number) {
+    if (proofOpen) return;
+    sfx.night();
+    const n = h('div', { class: 'nightfall', 'aria-hidden': 'true' }, h('div', {}, h('span', { class: 'moon' }, '☾'), h('b', {}, `Night ${round}`), h('p', {}, 'Doors lock. Keys come out. Somebody is leaking.')));
+    document.body.append(n);
+    setTimeout(() => n.classList.add('fade'), 1500);
+    setTimeout(() => n.remove(), 2100);
+  }
 
   function showMoment(e: GameEvent, v: View) {
     overlay?.remove();
