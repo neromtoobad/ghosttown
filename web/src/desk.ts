@@ -43,7 +43,8 @@ export function deskView(): HTMLElement {
   let P = puzzle();
   let key: number | null = null, tries = 0, accusations = 0, over = false;
   const opened = new Map<number, number>(); // payment id -> key index
-  const TRIES = 10;
+  const missed = new Map<number, Set<number>>(); // payment id -> keys that opened nothing
+  const TRIES = 16;
   const say = h('p', { class: 'dealer-line' });
   const keysRow = h('div', { class: 'keys' });
   const ledger = h('div', { class: 'ledger' });
@@ -55,7 +56,7 @@ export function deskView(): HTMLElement {
     keysRow.replaceChildren(...P.owners.map((_, i) => h('button', { class: `vkey${key === i ? ' on' : ''}`, type: 'button', disabled: over, onclick: () => ((key = i), draw()) }, h('i', {}, '🗝'), h('span', {}, `Viewing key ${'I'.repeat(i + 1).replace('III', 'III')}`), h('code', {}, `uview1${'x7k3q9m2a4'.slice(i * 3, i * 3 + 4)}…`))));
     ledger.replaceChildren(...P.pays.map((p) => {
       const k = opened.get(p.id);
-      if (k === undefined) return h('button', { class: 'pay-sealed', type: 'button', disabled: over || key === null, onclick: () => tryKey(p) }, h('span', { class: 'kicker' }, `Payment ${p.id + 1}`), h('span', { class: 'noise-line' }, Array.from({ length: 3 }, () => Array.from({ length: 22 }, () => '▓▒░█'[Math.floor(rand() * 4)]).join('')).join('\n')), h('span', { class: 'hint' }, key === null ? 'Pick a key first' : 'Try the key'));
+      if (k === undefined) return h('button', { class: 'pay-sealed', type: 'button', disabled: over || key === null, onclick: () => tryKey(p) }, h('span', { class: 'kicker' }, `Payment ${p.id + 1}`), h('span', { class: 'noise-line' }, Array.from({ length: 3 }, () => Array.from({ length: 22 }, () => '▓▒░█'[Math.floor(rand() * 4)]).join('')).join('\n')), h('span', { class: 'hint' }, missed.get(p.id)?.size ? `Not key ${[...missed.get(p.id)!].map((k) => 'I'.repeat(k + 1)).join(', ')}` : key === null ? 'Pick a key first' : 'Try the key'));
       const owner = P.owners[k];
       const incoming = p.to === owner;
       return h('div', { class: `pay-open${p.watcher ? ' watcher' : ''}` },
@@ -74,7 +75,11 @@ export function deskView(): HTMLElement {
     if (p.from === owner || p.to === owner) {
       opened.set(p.id, key);
       say.innerHTML = p.watcher ? 'That’s <b>mine</b>. Six-six-six for a job well done. Now: whose wallet received it?' : 'Ordinary ghost business. Keep looking.';
-    } else say.innerHTML = 'That key opens <b>nothing</b> in this payment. Viewing keys only see their own wallet.';
+    } else {
+      if (!missed.has(p.id)) missed.set(p.id, new Set());
+      missed.get(p.id)!.add(key);
+      say.innerHTML = 'That key opens <b>nothing</b> in this payment. Viewing keys only see their own wallet.';
+    }
     if (tries >= TRIES && !over) { over = true; say.innerHTML = `Dawn. You ran out of time. My Leaker was <b>${P.leaker.name}</b>.`; }
     draw();
   }
@@ -86,7 +91,7 @@ export function deskView(): HTMLElement {
     else say.innerHTML = `${s.name} is just a citizen. You’re guessing, Auditor.`;
     draw();
   }
-  const reset = () => { P = puzzle(); key = null; tries = 0; accusations = 0; over = false; opened.clear(); say.innerHTML = 'I paid one of these ghosts last night. Eight sealed payments. Three keys. Good luck.'; draw(); };
+  const reset = () => { P = puzzle(); key = null; tries = 0; accusations = 0; over = false; opened.clear(); missed.clear(); say.innerHTML = 'I paid one of these ghosts last night. Eight sealed payments. Three keys. Good luck.'; draw(); };
   reset();
 
   return h(
