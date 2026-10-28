@@ -6,6 +6,9 @@ import { TEAM, verifyDeal, type Event as GameEvent, type Role, type SeatView, ty
 import { h, copy, short, art } from './dom';
 import { portrait } from './pixel';
 import { CARD_TEXT, type ProofResult } from './zec';
+import { darkPool } from './glass/game';
+import { myGhost, watcher, WATCHER_SAYS } from './two';
+import './glass/pool.css';
 
 export interface Controller {
   table: string;
@@ -15,6 +18,8 @@ export interface Controller {
   view(): View;
   subscribe(f: () => void): () => void;
   act(target: number): void;
+  /** The Shielder lost Dark Pool: tonight's shield cracks. Tables without it skip the game. */
+  crack?(): void;
   vote(target: number | 'skip'): void;
   say(text: string): void;
   claim(role: Role, checked?: { seat: number; leaker: boolean }): void;
@@ -37,6 +42,10 @@ const ACTION: Partial<Record<Role, { verb: string; prompt: string }>> = {
 const TEAM_LABEL: Record<Team, string> = { town: 'The town', leak: 'The Leakers', glitch: 'The Glitch' };
 
 const portraitFor = (v: View, s: SeatView, table: string) => {
+  if (s.id === v.me && s.alive) {
+    const mine = myGhost(4);
+    if (mine) return mine;
+  }
   if (s.role) {
     const img = h('img', { src: art(`${s.alive ? 'role' : 'exposed'}-${s.role}.png`), alt: ROLE_NAME[s.role], loading: 'lazy' });
     img.addEventListener('error', () => img.replaceWith(portrait(`${table}:${s.name}`)), { once: true });
@@ -87,7 +96,7 @@ export function renderTable(root: HTMLElement, ctl: Controller, onLeave: () => v
           can ? 'button' : 'div',
           {
             class: `seat${s.alive ? '' : ' dead'}${s.id === v.me ? ' me' : ''}${can ? ' pick' : ''}${s.role ? ` r-${s.role}` : ''}`,
-            ...(can ? { type: 'button', onclick: () => (v.phase === 'night' ? ctl.act(s.id) : ctl.vote(s.id)) } : {}),
+            ...(can ? { type: 'button', onclick: () => (v.phase !== 'night' ? ctl.vote(s.id) : v.myRole === 'shielder' && ctl.crack ? openPool(s.id, s.name) : ctl.act(s.id)) } : {}),
           },
           h('span', { class: 'seat-art' }, portraitFor(v, s, ctl.table)),
           h('span', { class: 'seat-name' }, s.name),
@@ -110,6 +119,7 @@ export function renderTable(root: HTMLElement, ctl: Controller, onLeave: () => v
         h('span', { class: 'kicker' }, ctl.practice ? 'Your role card · specimen memo' : 'Your role card · shielded memo'),
         h('p', { class: 'memo-text' }, `You are ${CARD_TEXT[v.myRole]}`),
         h('p', { class: 'memo-deal' }, `deal: ${short(v.commitment, 12, 8)}`),
+        v.myRole === 'leaker' ? h('p', { class: 'memo-private watcher-line' }, watcher('read', 2), WATCHER_SAYS.card) : null,
         partners.length ? h('p', { class: 'memo-private' }, `Your fellow Leaker${partners.length > 1 ? 's' : ''}: ${partners.map((p) => p.name).join(', ')}`) : null,
         v.audits.length ? h('div', { class: 'notebook' }, h('span', { class: 'kicker' }, "Auditor's notebook"), ...v.audits.map((a) => h('p', {}, `Night ${a.round}: ${name(a.seat)} is `, h('b', { class: a.leaker ? 'bad' : 'ok' }, a.leaker ? 'a LEAKER' : 'not a Leaker')))) : null,
       ),
@@ -172,12 +182,13 @@ export function renderTable(root: HTMLElement, ctl: Controller, onLeave: () => v
   function showMoment(e: GameEvent, v: View) {
     overlay?.remove();
     const name = (id: number) => v.seats[id]?.name ?? '?';
-    let img = '', title = '', sub = '', cls = '';
+    let img = '', title = '', sub = '', cls = '', boss = '';
     if (e.kind === 'exposed') {
       img = `exposed-${e.role}.png`;
       title = e.by === 'dox' ? `${name(e.seat)} was doxxed.` : `${name(e.seat)} was voted out.`;
       sub = `They were ${ROLE_NAME[e.role]}.`;
       cls = 'bad';
+      if (e.by === 'dox') boss = WATCHER_SAYS.dox[e.round % WATCHER_SAYS.dox.length];
     } else if (e.kind === 'held') {
       img = 'night-shielder.png';
       title = 'The shield held.';
@@ -192,12 +203,50 @@ export function renderTable(root: HTMLElement, ctl: Controller, onLeave: () => v
       title = `${TEAM_LABEL[e.winner]} win${e.winner === 'leak' ? '' : 's'}.`;
       sub = e.winner === 'leak' ? 'The town is fully doxxed.' : 'Every Leaker is exposed.';
       cls = e.winner === 'leak' ? 'bad' : 'ok';
+      boss = e.winner === 'leak' ? WATCHER_SAYS.win : WATCHER_SAYS.lose;
     } else return;
-    overlay = h('div', { class: `moment ${cls}`, role: 'dialog', onclick: () => (overlay?.remove(), (overlay = null)) }, h('div', { class: 'moment-card' }, h('img', { src: art(img), alt: '' }), h('h2', {}, title), h('p', {}, sub), h('span', { class: 'hint' }, 'tap to continue')));
+    overlay = h('div', { class: `moment ${cls}`, role: 'dialog', onclick: () => (overlay?.remove(), (overlay = null)) }, h('div', { class: 'moment-card' }, h('img', { src: art(img), alt: '' }), h('h2', {}, title), h('p', {}, sub), boss ? h('p', { class: 'boss' }, watcher(cls === 'ok' ? 'defeated' : 'read', 3), h('span', {}, boss)) : null, h('span', { class: 'hint' }, 'tap to continue')));
     document.body.append(overlay);
     const mine = overlay;
     setTimeout(() => mine.classList.add('fade'), 3200);
     setTimeout(() => (mine.remove(), overlay === mine && (overlay = null)), 3800);
+  }
+
+  /** The Shielder's night is a round of Dark Pool, Glasstown's arcade game: carry coins out of the
+   *  glass and into the dark pool before the Watcher's drones catch you. Make more private than
+   *  you lose and the shield holds; otherwise it cracks and protects nobody tonight. */
+  function openPool(target: number, who: string) {
+    proofOpen = true;
+    const host = h('div', { class: 'pool-root pool-play' });
+    const verdict = h('div', { class: 'pool-verdict' });
+    const modal = h(
+      'div',
+      { class: 'modal pool-modal' },
+      h(
+        'div',
+        { class: 'modal-card pool-card' },
+        h('span', { class: 'kicker' }, 'The Shielder · night action'),
+        h('h2', {}, `Shield ${who}: run the Dark Pool.`),
+        h('p', { class: 'muted' }, "20 seconds. Carry coins out of the glass and into the dark pool. The Watcher's drones see whatever you carry. Make more private than you lose and the shield holds."),
+        host,
+        verdict,
+      ),
+    );
+    document.body.append(modal);
+    const stop = darkPool(host, {
+      seconds: 20,
+      onEnd: (r) => {
+        const held = r.shielded > 0 && r.shielded >= r.doxxed;
+        verdict.replaceChildren(h('p', { class: held ? 'ok-line' : 'error' }, held ? `✓ ${r.shielded.toFixed(2)} ZEC made private. Your shield over ${who} holds tonight.` : `✕ The drones caught you. Your shield cracks: nobody is protected tonight.`));
+        setTimeout(() => {
+          stop();
+          modal.remove();
+          proofOpen = false;
+          if (held) ctl.act(target);
+          else ctl.crack?.();
+        }, 1800);
+      },
+    });
   }
 
   function openProof(c: Controller, onClose: () => void) {
@@ -254,7 +303,7 @@ function feedItem(e: GameEvent, v: View): HTMLElement | null {
     case 'night':
       return h('div', { class: 'f-night' }, `☾ Night ${e.round} falls. Doors lock. Keys come out.`);
     case 'exposed':
-      return h('div', { class: 'f-exposed' }, e.by === 'dox' ? '☀ ' : '⚖ ', h('b', {}, name(e.seat)), e.by === 'dox' ? ' was doxxed in the night. ' : ' was voted out. ', 'They were ', h('span', { class: `rt r-${e.role}` }, ROLE_NAME[e.role]), '.');
+      return h('div', { class: 'f-exposed' }, e.by === 'dox' ? '☀ ' : '⚖ ', h('b', {}, name(e.seat)), e.by === 'dox' ? " was doxxed in the night by the Watcher's Leakers. " : ' was voted out. ', 'They were ', h('span', { class: `rt r-${e.role}` }, ROLE_NAME[e.role]), '.');
     case 'held':
       return h('div', { class: 'f-held' }, '☀ Someone tried to dox ', h('b', {}, name(e.seat)), '. The shield held.');
     case 'quiet':

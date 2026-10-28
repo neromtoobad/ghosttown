@@ -5,7 +5,7 @@
 
 import qrcode from 'qrcode-generator';
 import { ready, scan, txid as txidOf } from 'chit-zcash';
-import { claim, newGame, prove, say, seat, viewFor, vote as castVote, act as nightAct, winners, type Game, type Role, type View } from './engine';
+import { claim, crackShield, newGame, prove, say, seat, viewFor, vote as castVote, act as nightAct, winners, type Game, type Role, type View } from './engine';
 import { h, copy, short, art } from './dom';
 import { connect, makeKeys, open, peerId, seal, sharedKey, type Keys, type Wire } from './net';
 import { BOT_NAMES, randomHex } from './practice';
@@ -335,6 +335,7 @@ class HostTable {
       view: () => viewFor(this.g, me),
       subscribe: (f) => (this.subs.add(f), () => this.subs.delete(f)),
       act: (t) => (nightAct(this.g, me, t), this.run.tick()),
+      crack: () => (crackShield(this.g, me), this.run.tick()),
       vote: (t) => (castVote(this.g, me, t), this.run.tick()),
       say: (text) => (say(this.g, me, text), this.emit()),
       claim: (role, checked) => (claim(this.g, me, role, checked), this.emit()),

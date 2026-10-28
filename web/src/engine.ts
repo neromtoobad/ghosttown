@@ -155,6 +155,15 @@ export function act(g: Game, id: number, target: number) {
   else if (me.role === 'auditor') g.night.audit = target;
 }
 
+/** The Shielder ran Dark Pool and the Watcher's drones caught them: tonight's shield cracks and
+ *  protects nobody. The night still counts as acted, and tomorrow any ghost may be shielded. */
+export function crackShield(g: Game, id: number) {
+  if (g.phase !== 'night') throw new Error('Not night.');
+  const me = seat(g, id);
+  if (!me.alive || me.role !== 'shielder') throw new Error('Only a living Shielder holds a shield.');
+  g.night.shield = -1;
+}
+
 /** Ends the night: dox (unless shielded), the audit, then the morning. */
 export function resolveNight(g: Game) {
   const r = rng(g.seed, `night${g.round}`);
@@ -301,10 +310,10 @@ export function botNight(g: Game, id: number) {
 }
 
 const LINES = {
-  open: ['Quiet night. Too quiet.', 'Somebody here has been leaking metadata.', 'I have nothing to hide. Literally, it is all shielded.', 'Whoever it is, your memos are showing.', 'Let us not vote on vibes this time.', 'I was asleep. Encrypted, even.'],
+  open: ['Quiet night. Too quiet.', 'The Watcher is out there, across the river. Somebody here works for him.', 'I left Glasstown to get away from the Watcher. Now this.', 'Somebody here has been leaking metadata.', 'I have nothing to hide. Literally, it is all shielded.', 'Whoever it is, your memos are showing.', 'Let us not vote on vibes this time.', 'I was asleep. Encrypted, even.'],
   accuse: (n: string) => [`${n} has been very quiet. Shielded quiet.`, `I do not trust ${n}.`, `${n}, where were you last block?`, `My gut says ${n}.`, `${n} keeps changing the subject.`],
   defend: ['I am a citizen. Check me if you like.', 'Vote me and you lose a friend of the town.', 'Wrong ghost. Keep looking.'],
-  mourn: (n: string) => [`RIP ${n}. Fully doxxed.`, `They got ${n}. We need answers.`, `${n} did not deserve that.`],
+  mourn: (n: string) => [`RIP ${n}. Fully doxxed.`, `The Watcher got ${n}. He is laughing in Glasstown.`, `They got ${n}. We need answers.`, `${n} did not deserve that.`],
 };
 
 /** One bot's turn to talk in the day: maybe a claim, maybe a lie, maybe just noise. */

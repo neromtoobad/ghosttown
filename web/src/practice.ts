@@ -1,7 +1,7 @@
 // The practice table: one human, the rest bots, the whole engine in this tab. No ZEC moves;
 // proofs of role run against the specimen deal, a real proven transaction that is not on chain.
 
-import { claim, newGame, prove, say, seat, viewFor, vote as castVote, act as nightAct, type Role } from './engine';
+import { claim, crackShield, newGame, prove, say, seat, viewFor, vote as castVote, act as nightAct, type Role } from './engine';
 import { createRunner } from './runner';
 import { proveRole, specimen, type ProofResult } from './zec';
 import type { Controller } from './table';
@@ -30,6 +30,10 @@ export function practiceTable(name: string, size: number): Controller {
     },
     act(target) {
       nightAct(g, me, target);
+      run.tick();
+    },
+    crack() {
+      crackShield(g, me);
       run.tick();
     },
     vote(target) {

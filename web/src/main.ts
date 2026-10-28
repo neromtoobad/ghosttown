@@ -7,6 +7,8 @@ import { practiceTable } from './practice';
 import { renderTable, ROLE_NAME, type Controller } from './table';
 import { hostSetup, joinView } from './staked';
 import type { Role } from './engine';
+import { galleryView } from './gallery';
+import { fromGlasstown, myGhost, watcher } from './two';
 
 const app = document.getElementById('app')!;
 let leave: (() => void) | null = null;
@@ -15,16 +17,16 @@ function shell(...kids: Node[]) {
   leave?.();
   leave = null;
   app.replaceChildren(
-    h('header', { class: 'top' }, h('a', { class: 'brand', href: '#/' }, h('img', { src: art('role-leaker.png'), alt: '' }), h('b', {}, 'GHOST TOWN')), h('nav', {}, h('a', { href: '#/practice' }, 'Practice'), h('a', { href: '#/host' }, 'Host a table'), h('a', { href: '#/how' }, 'Why it is fair'))),
+    h('header', { class: 'top' }, h('a', { class: 'brand', href: '#/' }, h('img', { src: art('role-leaker.png'), alt: '' }), h('b', {}, 'GHOST TOWN')), h('nav', {}, h('a', { href: '/glasstown.html' }, 'Glasstown'), h('a', { href: '#/practice' }, 'Practice'), h('a', { href: '#/host' }, 'Host a table'), h('a', { href: '#/gallery' }, 'Glass Gallery'), h('a', { href: '#/how' }, 'Why it is fair'))),
     h('main', {}, ...kids),
-    h('footer', {}, h('span', {}, 'A shielded social deduction game on Zcash. Proofs by ', h('a', { href: 'https://chit.nerom.site', target: '_blank', rel: 'noreferrer' }, 'chit-zcash'), '.'), h('span', {}, 'ZECATHON · Wildcard')),
+    h('footer', {}, h('span', {}, 'A shielded social deduction game on Zcash. Proofs by ', h('a', { href: 'https://chit.nerom.site', target: '_blank', rel: 'noreferrer' }, 'chit-zcash'), '.'), h('span', {}, 'Glasstown + Ghost Town · ZECATHON')),
   );
 }
 
 const CAST: [Role, string][] = [
-  ['leaker', 'Wants every ghost doxxed. Each night, picks one to expose. Can lie about anything except a role card.'],
+  ['leaker', "Works for the Watcher. Each night, picks one ghost to dox. Can lie about anything except a role card."],
   ['auditor', "Holds the viewing keys. Each night, checks one ghost: Leaker or not. The only role the Leakers fear."],
-  ['shielder', 'Each night, shields one ghost from the dox. Never the same ghost twice in a row.'],
+  ['shielder', "Each night, runs the Dark Pool to shield one ghost from the dox. Get caught by the Watcher's drones and the shield cracks."],
   ['glitch', 'On nobody\'s side. Wins by getting voted out. Acts as shady as possible.'],
   ['citizen', 'No powers, one vote. Reads the room, weighs the claims, demands proof.'],
 ];
@@ -38,22 +40,34 @@ const FAIR: [string, string][] = [
 ];
 
 function home() {
+  const ghost = myGhost(5);
   shell(
     h(
       'section',
-      { class: 'hero' },
-      h('div', { class: 'hero-art', 'aria-hidden': 'true' }),
+      { class: 'towns' },
+      h(
+        'a',
+        { class: 'town glass-town', href: '/glasstown.html' },
+        h('span', { class: 'town-kicker' }, 'Town one · public'),
+        h('b', { class: 'town-name' }, 'GLASSTOWN'),
+        h('p', {}, 'Everyone here is made of glass. The Watcher reads every wallet: your job, your home, your name.'),
+        h('div', { class: 'town-cast' }, watcher('peer', 4)),
+        h('span', { class: 'btn' }, fromGlasstown() ? 'Walk it again · 3 min' : 'Start here · 3 min'),
+      ),
+      h('div', { class: 'river', 'aria-hidden': 'true' }, h('span', {}, 'the shielded pool')),
       h(
         'div',
-        { class: 'hero-copy' },
-        h('p', { class: 'eyebrow' }, 'A shielded social deduction game · Zcash'),
-        h('h1', {}, 'GHOST', h('br'), h('em', {}, 'TOWN')),
-        h('p', { class: 'lede' }, 'Mafia, where your role card is a shielded memo, nobody can fake a role claim, and the pot pays out in ZEC. Somebody in this town is leaking. Find them before they dox you.'),
+        { class: 'town ghost-town' },
+        h('div', { class: 'hero-art', 'aria-hidden': 'true' }),
+        h('span', { class: 'town-kicker' }, 'Town two · shielded'),
+        h('b', { class: 'town-name' }, 'GHOST', h('br'), h('em', {}, 'TOWN')),
+        h('p', {}, 'Mafia on Zcash. Your role card is a shielded memo, nobody can fake a role claim, and the pot pays out in ZEC. The Watcher cannot see in here, so he sends Leakers.'),
+        ghost ? h('div', { class: 'town-me' }, ghost, h('span', {}, 'Your ghost, from Glasstown')) : null,
         h('div', { class: 'row' }, h('a', { class: 'btn primary', href: '#/practice' }, 'Play a practice table'), h('a', { class: 'btn', href: '#/host' }, 'Host a staked table')),
-        h('p', { class: 'hint' }, 'Practice: you against bots, in this tab, about four minutes. No wallet needed.'),
+        h('a', { class: 'gallery-link', href: '#/gallery' }, 'Or watch a real mainnet deal from the Glass Gallery →'),
       ),
     ),
-    h('section', { class: 'cast' }, h('p', { class: 'eyebrow' }, 'The cast'), h('h2', {}, 'Five roles. One of them is lying.'), h('div', { class: 'cast-grid' }, ...CAST.map(([r, t]) => h('div', { class: `cast-card r-${r}` }, h('img', { src: art(`role-${r}.png`), alt: '' }), h('h3', {}, ROLE_NAME[r]), h('p', {}, t))))),
+    h('section', { class: 'cast' }, h('p', { class: 'eyebrow' }, 'The cast'), h('h2', {}, 'Five roles. One boss. Somebody is lying.'), h('div', { class: 'cast-grid' }, h('div', { class: 'cast-card r-watcher' }, watcher('read', 6), h('h3', {}, 'The Watcher'), h('p', {}, 'Lives in Glasstown and reads every public wallet. He cannot see into Ghost Town, so he runs the Leakers. Never sits at the table.')), ...CAST.map(([r, t]) => h('div', { class: `cast-card r-${r}` }, h('img', { src: art(`role-${r}.png`), alt: '' }), h('h3', {}, ROLE_NAME[r]), h('p', {}, t))))),
     h('section', { class: 'fair' }, h('p', { class: 'eyebrow' }, 'Why it needs Zcash'), h('h2', {}, 'Mafia is a game of secrets.', h('br'), 'Zcash is a system for them.'), h('div', { class: 'fair-grid' }, ...FAIR.map(([t, b], i) => h('div', { class: 'fair-card' }, h('span', { class: 'num' }, String(i + 1).padStart(2, '0')), h('h3', {}, t), h('p', {}, b)))), h('a', { class: 'btn', href: '#/how' }, 'The full rules and the fairness model →')),
   );
 }
@@ -68,6 +82,7 @@ function practiceSetup() {
       h('img', { class: 'setup-art', src: art('night-auditor.png'), alt: '' }),
       h('p', { class: 'eyebrow' }, 'Practice table'),
       h('h1', {}, 'Take a seat.'),
+      myGhost(5) ? h('div', { class: 'town-me' }, myGhost(5)!, h('span', {}, 'You sit as the ghost you earned in Glasstown.')) : h('p', { class: 'hint' }, h('a', { href: '/glasstown.html' }, 'New here? Walk through Glasstown first'), ' (3 min): you earn the ghost you play as.'),
       h('p', { class: 'muted' }, 'You and a table of bots. The bots claim, accuse and lie. Your role card and its proof run against the specimen deal: a real, proven Zcash transaction that is not on chain.'),
       h('label', {}, 'Name'),
       name,
@@ -124,6 +139,7 @@ function render() {
   else if (head === 'how') how();
   else if (head === 'host') shell(hostSetup(playTable));
   else if (head === 't' && a) shell(joinView(a.toUpperCase(), playTable));
+  else if (head === 'gallery') shell(galleryView(a));
   else home();
   window.scrollTo(0, 0);
 }

@@ -24,5 +24,6 @@ export default defineConfig({
   define: { __RELAY__: JSON.stringify(RELAY) },
   // chit-zcash loads its .wasm relative to its own module; pre-bundling would break that URL.
   optimizeDeps: { exclude: ['chit-zcash'] },
-  build: { target: 'es2022', assetsInlineLimit: 0 },
+  // Two pages: Ghost Town (index.html) and its front door, Glasstown (glasstown.html).
+  build: { target: 'es2022', assetsInlineLimit: 0, rollupOptions: { input: { main: 'index.html', glasstown: 'glasstown.html' } } },
 });

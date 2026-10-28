@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { act, alive, botDay, botNight, botVote, commit, newGame, nightPending, openVote, resolveNight, resolveVote, rolesFor, verifyDeal, vote, votePending, winners, type Game } from './engine';
+import { act, alive, crackShield, botDay, botNight, botVote, commit, newGame, nightPending, openVote, resolveNight, resolveVote, rolesFor, verifyDeal, vote, votePending, winners, type Game } from './engine';
 
 const table = (n: number) => Array.from({ length: n }, (_, i) => ({ name: `Ghost ${i + 1}`, bot: true }));
 
@@ -87,5 +87,21 @@ describe('full games between bots', () => {
     // Neither side should win almost every game: the bots make it a contest.
     expect(wins.town).toBeGreaterThan(300);
     expect(wins.leak).toBeGreaterThan(300);
+  });
+});
+
+describe('Dark Pool', () => {
+  it('a cracked shield protects nobody, and the night still ends', () => {
+    const g = newGame(table(5), 'crack-seed', 'salt');
+    const shielder = g.seats.find((s) => s.role === 'shielder')!;
+    const leaker = g.seats.find((s) => s.role === 'leaker')!;
+    const victim = g.seats.find((s) => s.role !== 'leaker' && s.id !== shielder.id)!;
+    act(g, leaker.id, victim.id);
+    crackShield(g, shielder.id);
+    for (const id of nightPending(g)) botNight(g, id);
+    expect(nightPending(g)).toEqual([]);
+    resolveNight(g);
+    expect(g.seats[victim.id].alive).toBe(false);
+    expect(g.lastShield).toBe(-1);
   });
 });
