@@ -9,6 +9,11 @@ import { hostSetup, joinView } from './staked';
 import type { Role } from './engine';
 import { galleryView } from './gallery';
 import { fromGlasstown, myGhost, watcher } from './two';
+import { hub, toggleRadio } from './hub';
+import { lanternsView } from './lanterns';
+import { deskView } from './desk';
+import { darkPool } from './glass/game';
+import { state as glassState } from './glass/state';
 
 const app = document.getElementById('app')!;
 let leave: (() => void) | null = null;
@@ -17,7 +22,7 @@ function shell(...kids: Node[]) {
   leave?.();
   leave = null;
   app.replaceChildren(
-    h('header', { class: 'top' }, h('a', { class: 'brand', href: '#/' }, h('img', { src: art('role-leaker.png'), alt: '' }), h('b', {}, 'GHOST TOWN')), h('nav', {}, h('a', { href: '/glasstown.html' }, 'Glasstown'), h('a', { href: '#/practice' }, 'Practice'), h('a', { href: '#/host' }, 'Host a table'), h('a', { href: '#/gallery' }, 'Glass Gallery'), h('a', { href: '#/how' }, 'Why it is fair'))),
+    h('header', { class: 'top' }, h('a', { class: 'brand', href: '#/' }, h('img', { src: art('role-leaker.png'), alt: '' }), h('b', {}, 'GHOST TOWN')), h('nav', {}, h('a', { href: '#/practice' }, 'Séance Hall'), h('a', { href: '#/lanterns' }, 'Lanterns'), h('a', { href: '#/desk' }, 'Desk'), h('a', { href: '#/arcade' }, 'Arcade'), h('a', { href: '#/gallery' }, 'Gallery'), h('a', { href: '/glasstown.html', class: 'nav-glass' }, 'Glasstown'))),
     h('main', {}, ...kids),
     h('footer', {}, h('span', {}, 'A shielded social deduction game on Zcash. Proofs by ', h('a', { href: 'https://chit.nerom.site', target: '_blank', rel: 'noreferrer' }, 'chit-zcash'), '.'), h('span', {}, 'Glasstown + Ghost Town · ZECATHON')),
   );
@@ -40,36 +45,20 @@ const FAIR: [string, string][] = [
 ];
 
 function home() {
-  const ghost = myGhost(5);
   shell(
-    h(
-      'section',
-      { class: 'towns' },
-      h(
-        'a',
-        { class: 'town glass-town', href: '/glasstown.html' },
-        h('span', { class: 'town-kicker' }, 'Town one · public'),
-        h('b', { class: 'town-name' }, 'GLASSTOWN'),
-        h('p', {}, 'Everyone here is made of glass. The Watcher reads every wallet: your job, your home, your name.'),
-        h('div', { class: 'town-cast' }, watcher('peer', 4)),
-        h('span', { class: 'btn' }, fromGlasstown() ? 'Walk it again · 3 min' : 'Start here · 3 min'),
-      ),
-      h('div', { class: 'river', 'aria-hidden': 'true' }, h('span', {}, 'the shielded pool')),
-      h(
-        'div',
-        { class: 'town ghost-town' },
-        h('div', { class: 'hero-art', 'aria-hidden': 'true' }),
-        h('span', { class: 'town-kicker' }, 'Town two · shielded'),
-        h('b', { class: 'town-name' }, 'GHOST', h('br'), h('em', {}, 'TOWN')),
-        h('p', {}, 'Mafia on Zcash. Your role card is a shielded memo, nobody can fake a role claim, and the pot pays out in ZEC. The Watcher cannot see in here, so he sends Leakers.'),
-        ghost ? h('div', { class: 'town-me' }, ghost, h('span', {}, 'Your ghost, from Glasstown')) : null,
-        h('div', { class: 'row' }, h('a', { class: 'btn primary', href: '#/practice' }, 'Play a practice table'), h('a', { class: 'btn', href: '#/host' }, 'Host a staked table')),
-        h('a', { class: 'gallery-link', href: '#/gallery' }, 'Or watch a real mainnet deal from the Glass Gallery →'),
-      ),
-    ),
-    h('section', { class: 'cast' }, h('p', { class: 'eyebrow' }, 'The cast'), h('h2', {}, 'Five roles. One boss. Somebody is lying.'), h('div', { class: 'cast-grid' }, h('div', { class: 'cast-card r-watcher' }, watcher('read', 6), h('h3', {}, 'The Watcher'), h('p', {}, 'Lives in Glasstown and reads every public wallet. He cannot see into Ghost Town, so he runs the Leakers. Never sits at the table.')), ...CAST.map(([r, t]) => h('div', { class: `cast-card r-${r}` }, h('img', { src: art(`role-${r}.png`), alt: '' }), h('h3', {}, ROLE_NAME[r]), h('p', {}, t))))),
+    hub(),
+    h('section', { class: 'cast' }, h('p', { class: 'eyebrow' }, 'The cast'), h('h2', {}, 'Five roles. One boss. Somebody is lying.'), h('div', { class: 'cast-grid' }, h('div', { class: 'cast-card r-watcher' }, watcher('read', 6), h('h3', {}, 'The Watcher'), h('p', {}, 'Lives across the river in Glasstown and reads every public wallet. He cannot see into Ghost Town, so he runs the Leakers. Never sits at the table.')), ...CAST.map(([r, t]) => h('div', { class: `cast-card r-${r}` }, h('img', { src: art(`role-${r}.png`), alt: '' }), h('h3', {}, ROLE_NAME[r]), h('p', {}, t))))),
     h('section', { class: 'fair' }, h('p', { class: 'eyebrow' }, 'Why it needs Zcash'), h('h2', {}, 'Mafia is a game of secrets.', h('br'), 'Zcash is a system for them.'), h('div', { class: 'fair-grid' }, ...FAIR.map(([t, b], i) => h('div', { class: 'fair-card' }, h('span', { class: 'num' }, String(i + 1).padStart(2, '0')), h('h3', {}, t), h('p', {}, b)))), h('a', { class: 'btn', href: '#/how' }, 'The full rules and the fairness model →')),
   );
+}
+
+/** The Arcade: Dark Pool on its own cabinet. */
+function arcade() {
+  const host = h('div', { class: 'pool-root pool-play arcade-cab' });
+  const out = h('p', { class: 'hint' }, `Best: ${(glassState.best ?? 0).toFixed(2)} ZEC made private`);
+  shell(h('section', { class: 'arcade' }, h('p', { class: 'eyebrow' }, 'Arcade · Dark Pool'), h('h1', {}, 'Out of the glass.'), h('p', { class: 'muted' }, "Pick up coins in the glass district and carry them into the dark pool. Whatever you carry is public, so the Watcher's drones spot you from further away. It's what the Shielder plays every night at the table."), host, out));
+  const stop = darkPool(host, { seconds: 45, onEnd: (r) => (out.textContent = `${r.shielded.toFixed(2)} ZEC made private, ${r.doxxed.toFixed(2)} lost to the drones. Best ${r.best.toFixed(2)}${r.isBest ? ' (new best!)' : ''}.`) });
+  leave = stop;
 }
 
 function practiceSetup() {
@@ -140,6 +129,10 @@ function render() {
   else if (head === 'host') shell(hostSetup(playTable));
   else if (head === 't' && a) shell(joinView(a.toUpperCase(), playTable));
   else if (head === 'gallery') shell(galleryView(a));
+  else if (head === 'lanterns') shell(lanternsView());
+  else if (head === 'desk') shell(deskView());
+  else if (head === 'arcade') arcade();
+  else if (head === 'radio') { home(); toggleRadio(); }
   else home();
   window.scrollTo(0, 0);
 }

@@ -93,12 +93,12 @@ app.append(
 function title() {
   const zero = castPortrait('zee', 'wave', 6), watch = castPortrait('peep', 'peer', 6);
   main.replaceChildren(h('section', { class: 'door-title' },
-    h('p', { class: 'kicker' }, 'Two towns, one river'),
+    h('p', { class: 'kicker' }, 'Across the river from Ghost Town'),
     h('h1', { class: 'door-h1' }, 'GLASSTOWN'),
     h('p', { class: 'door-lede' }, 'Everyone here is made of glass. The Watcher reads every wallet. Across the river is Ghost Town, where everyone is shielded and he can’t see a thing. So he sends Leakers in.'),
     h('div', { class: 'door-cast' }, h('figure', {}, zero, h('figcaption', {}, 'ZERO · your guide')), h('figure', {}, watch, h('figcaption', {}, 'WATCHER · runs the Leakers'))),
-    h('div', { class: 'door-actions' }, btn('Walk through Glasstown · 3 min', () => (location.hash = '#/walk'), 'primary big'), h('a', { class: 'btn', href: '/' }, 'Skip to Ghost Town')),
-    h('p', { class: 'fine' }, 'You earn a pixel identity on the way. It becomes your ghost at the table.')));
+    h('div', { class: 'door-actions' }, btn('Walk through Glasstown · 3 min', () => (location.hash = '#/walk'), 'primary big'), h('a', { class: 'btn', href: '/' }, '← Back to Ghost Town')),
+    h('p', { class: 'fine' }, 'A side trip for anyone new to shielded money. You earn a pixel identity on the way, and it becomes your ghost at the table.')));
 }
 
 async function walk() {
@@ -139,7 +139,7 @@ function shatter() {
   }
   document.body.append(wall);
   requestAnimationFrame(() => wall.classList.add('go'));
-  setTimeout(() => (location.href = '/#/practice'), 1500);
+  setTimeout(() => (location.href = '/'), 1500);
 }
 
 function route() {
