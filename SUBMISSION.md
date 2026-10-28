@@ -1,11 +1,11 @@
-# ZECATHON submission: Glasstown + Ghost Town ("Two Towns")
+# ZECATHON submission: Ghost Town (the hub)
 
-**Which account submits it is still open.** Rule 04 allows one submission per account, and @neromtoobad entered Chit. Submit this from an account that has no other entry.
+Submitted from **@neromtoobad** (your account). Chit moves to a friend's account, because rule 04 allows one submission per account. If Chit is already saved under your account on the form, delete or withdraw that draft first.
 
 ## Project name (64 max)
 
 ```
-Ghost Town: shielded Mafia on Zcash, with Glasstown as way in
+Ghost Town: a shielded town on Zcash, Mafia at its heart
 ```
 
 ## Track
@@ -15,22 +15,23 @@ WILDCARD
 ## Description (2000 max)
 
 ```
-Two towns, one river. In Glasstown every wallet is glass: the Watcher reads your job, home and name from public payments. Across the river is Ghost Town, where everyone is shielded and he can't see in, so he sends Leakers. Ghost Town is Mafia where every secret is a shielded transaction.
+Ghost Town is a street of old TVs, and every screen is a door. Everyone here is shielded. The Watcher, who reads every public wallet across the river in Glasstown, can't see in, so he sends Leakers. Each door teaches one Zcash idea by making you play it.
 
-Glasstown (the way in, 3 min): tap a glass wallet and watch the Watcher learn you; tap a shielded one and he learns nothing; play Dark Pool, carrying coins into the shielded pool past his drones; cross the river. The pixel identity you earn becomes your ghost at the table.
+Séance Hall: Mafia where every secret is a shielded transaction.
+- One multi-recipient ZIP 321 request deals every role card as an encrypted memo. Only your wallet reads yours.
+- Every card carries a SHA-256 commitment to the deal; the salt is revealed at the end and re-checked.
+- Claims are cheap: a chit (single-output disclosure) for your card is verified against the deal tx with the official Zcash crates in WASM. A Leaker can claim Auditor, never prove it.
+- The Shielder's night is a round of Dark Pool; get caught and the shield cracks. Shielded ballots, ZIP 321 buy-in and payout.
 
-Ghost Town:
-- The deal: one multi-recipient ZIP 321 request pays every player 0.0001 ZEC; each encrypted memo is a role card. Only your wallet reads yours.
-- No cheating narrator: every card carries a SHA-256 commitment to the deal; at the end the salt is revealed and every browser re-checks it.
-- Proof of role: claims are cheap. A chit (single-output disclosure) for your card is verified against the deal tx with the official Zcash crates in WASM. A Leaker can claim Auditor, never prove it.
-- The Shielder's night is a round of Dark Pool. Get caught and the shield cracks.
-- Shielded ballots (tallies only), ZIP 321 buy-in and payout.
-- Glass Gallery: a real mainnet deal seen from Glasstown (sealed actions, raw bytes) beside the cards opened with chits. The rest stay dark.
+Three Lanterns: a shell game sealed by a commitment. The Watcher lies mid-game; the re-hash in your browser catches him.
+Auditor's Desk: unlabelled viewing keys, sealed payments. Keys open only their own wallet, incoming notes hide the sender. Find who the Watcher paid.
+Arcade: Dark Pool. Carry coins from glass into the shielded pool past his drones.
+Glass Gallery: a real mainnet deal from the glass side (sealed actions, raw bytes) beside cards opened with chits.
+Glasstown: a 3-minute side trip for newcomers; the identity you earn becomes your ghost.
 
-Real, on Zcash mainnet: table EAS24 was dealt Oct 28 in tx d3433a76…8c57 (2 cards, 1 tx); its Auditor proved her card live. See ghosttown.nerom.site/#/gallery
-Also real: engine (bot-vs-bot tests), bots, encrypted multiplayer (X25519 + XChaCha20 via a ciphertext-only relay), proof checks.
-Specimen: the practice table's deal is a proven tx funded from nothing, so not on chain; always labelled.
-Trust: the host's browser knows all roles, like a human narrator; the commitment proves the deal was not changed.
+Real, Zcash mainnet: table EAS24 dealt Oct 28 in tx d3433a76…8c57 (2 cards, 1 tx); its Auditor proved her card live (#/gallery).
+Also real: engine with bot-vs-bot tests, encrypted multiplayer (X25519 + XChaCha20 via a ciphertext-only relay), proof checks.
+Specimen: the practice deal is a proven tx not on chain; always labelled. Trust: the host's browser knows the roles, like a human narrator; the commitment proves the deal didn't change.
 ```
 
 ## Code repository
@@ -47,14 +48,14 @@ Public since Oct 28. Tick the "public by the deadline" box.
 https://ghosttown.nerom.site
 ```
 
-Glasstown, the way in: https://ghosttown.nerom.site/glasstown
+Doors: #/practice · #/lanterns · #/desk · #/arcade · #/gallery · /glasstown
 
 ## Demo video
 
-`zecathon/ghosttown-video.mp4`: a music video set to an original song, "Ghost Town". Upload it to YouTube, then paste the link.
+`zecathon/ghosttown-video.mp4`: a music video set to an original UK rap track, "Ghost Town", built from real gameplay and the mainnet deal. Upload it to YouTube, then paste the link.
 
 ## Before pressing SUBMIT
 
-- [ ] Decide the account (not @neromtoobad, which holds Chit).
+- [ ] Chit moved off @neromtoobad (a friend submits it).
 - [ ] Video uploaded, link pasted.
 - [ ] SAVE DRAFT first, then SUBMIT.
