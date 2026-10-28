@@ -53,10 +53,14 @@ Doors: #/practice · #/lanterns · #/desk · #/arcade · #/gallery · /glasstown
 
 ## Demo video
 
-`zecathon/ghosttown-video.mp4` (1:46): a 20-second short film (the Watcher, a Leaker, the Shielder, the Auditor), then an original UK drill track that walks through every door in the hub, from real gameplay and the mainnet deal. Upload it to YouTube, then paste the link.
+```
+https://youtu.be/4t8ewAmfA00
+```
+
+1:46: a 20-second short film (the Watcher, a Leaker, the Shielder, the Auditor), then an original UK drill track that walks through every door in the hub, from real gameplay and the mainnet deal.
 
 ## Before pressing SUBMIT
 
 - [ ] Chit moved off @neromtoobad (a friend submits it).
-- [ ] Video uploaded, link pasted.
+- [x] Video uploaded: https://youtu.be/4t8ewAmfA00
 - [ ] SAVE DRAFT first, then SUBMIT.

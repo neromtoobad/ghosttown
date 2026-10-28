@@ -4,7 +4,7 @@
 
 - **Play:** https://ghosttown.nerom.site (no wallet, no account)
 - **Judges, start here:** https://ghosttown.nerom.site/#/tour. It runs ten live checks in about 90 seconds against a real deal on Zcash mainnet: four forgeries, all rejected.
-- **Video:** the 1:46 demo (a short film, then a UK drill track that walks through every door). The link is in the submission.
+- **Video:** https://youtu.be/4t8ewAmfA00 (1:46: a short film, then a UK drill track that walks through every door)
 
 ZECATHON 2026 · Wildcard · MIT or Apache-2.0.
 
